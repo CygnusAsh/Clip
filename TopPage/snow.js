@@ -1,8 +1,17 @@
+window.addEventListener("DOMContentLoaded", () => {
+
+// ===== 要素 =====
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const overlay = document.getElementById("overlayText");
 
-/* ===== 雪 ===== */
+const bgm = document.getElementById("bgm");
+const toggle = document.getElementById("toggle");
+const volume = document.getElementById("volume");
+
+bgm.volume = 0;
+
+// ===== Canvas =====
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
@@ -61,7 +70,7 @@ function animate(){
   requestAnimationFrame(animate);
 }
 
-/* カーソル */
+// ===== カーソル =====
 window.addEventListener("mousemove",e=>{
   for(let i=0;i<3;i++){
     cursorFlakes.push({
@@ -75,22 +84,53 @@ window.addEventListener("mousemove",e=>{
   }
 });
 
-/* 開始 */
+// ===== 開始 =====
 window.addEventListener("click",()=>{
-  intro.style.display="none";
-  main.classList.add("show");
 
-  resize();
-  init();
-  animate();
+  intro.classList.add("open");
 
-  // ★確実に出る
   setTimeout(()=>{
-    overlay.classList.add("show");
-  },1500);
+    intro.style.display="none";
+    main.classList.add("show");
+
+    resize();
+    init();
+    animate();
+
+    // BGM
+    bgm.play().catch(()=>{});
+    let v=0;
+    const fade=setInterval(()=>{
+      v+=0.02;
+      bgm.volume=v;
+      if(v>=0.5) clearInterval(fade);
+    },100);
+
+    // メニュー表示（確実にここで出る）
+    setTimeout(()=>{
+      overlay.classList.add("show");
+    },1500);
+
+  },1000);
+
 },{once:true});
 
-/* 選択 */
+// ===== UI =====
+toggle.onclick = ()=>{
+  if(bgm.paused){
+    bgm.play();
+    toggle.textContent="⏸";
+  }else{
+    bgm.pause();
+    toggle.textContent="▶";
+  }
+};
+
+volume.oninput = ()=>{
+  bgm.volume = volume.value;
+};
+
+// ===== 選択 =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
@@ -99,9 +139,11 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
     btn.classList.add("selected");
 
     setTimeout(()=>{
-      alert("遷移ここ"); // 動作確認用
+      location.href = btn.href;
     },500);
   });
 });
 
 window.onresize=resize;
+
+});
