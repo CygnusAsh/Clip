@@ -1,81 +1,74 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Cygnus Ash</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cygnus Ash</title>
 
-  <link rel="stylesheet" href="./snow.css" />
+<link rel="stylesheet" href="./snow.css">
 </head>
 
 <body>
-  <!-- 🎵 BGM -->
-  <audio id="bgm" src="./bgm.mp3" loop playsinline></audio>
 
-  <!-- ❄️ 雪 -->
-  <canvas id="snow"></canvas>
+<audio id="bgm" src="./bgm.mp3" loop playsinline></audio>
 
-  <!-- 🎛 UI -->
-  <div class="audio-ui">
-    <button id="toggle">▶</button>
-    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
-  </div>
+<canvas id="snow"></canvas>
 
-  <!-- メイン -->
-  <main class="hero">
-    <h1>Cygnus Ash</h1>
-  </main>
+<div class="audio-ui">
+  <button id="toggle">▶</button>
+  <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+</div>
 
-  <script src="./snow.js"></script>
+<main class="hero">
+  <h1>Cygnus Ash</h1>
+</main>
 
-  <script>
-    // ===== BGM制御 =====
-    const bgm = document.getElementById("bgm");
-    const toggle = document.getElementById("toggle");
-    const volume = document.getElementById("volume");
+<script src="./snow.js"></script>
 
-    bgm.volume = 0.5;
+<script>
+const bgm = document.getElementById("bgm");
+const toggle = document.getElementById("toggle");
+const volume = document.getElementById("volume");
 
-    // 最初は止まってる状態
-    let started = false;
+bgm.volume = 0.5;
 
-    function startBGM() {
-      if (started) return;
-      started = true;
+let started = false;
 
-      // フェードイン再生
-      bgm.volume = 0;
-      bgm.play().catch(() => {});
+// 👇 最初のタップで再生
+function startBGM() {
+  if (started) return;
+  started = true;
 
-      let v = 0;
-      const fade = setInterval(() => {
-        v += 0.02;
-        bgm.volume = v;
-        if (v >= 0.5) clearInterval(fade);
-      }, 100);
+  bgm.volume = 0;
+  bgm.play().catch(()=>{});
 
-      toggle.textContent = "⏸";
-    }
+  let v = 0;
+  const fade = setInterval(()=>{
+    v += 0.02;
+    bgm.volume = v;
+    if(v >= 0.5) clearInterval(fade);
+  },100);
 
-    // 👇 最初のタップで確実再生（スマホ対応）
-    window.addEventListener("click", startBGM, { once: true });
-    window.addEventListener("touchstart", startBGM, { once: true });
+  toggle.textContent = "⏸";
+}
 
-    // 再生/停止
-    toggle.addEventListener("click", () => {
-      if (bgm.paused) {
-        bgm.play();
-        toggle.textContent = "⏸";
-      } else {
-        bgm.pause();
-        toggle.textContent = "▶";
-      }
-    });
+window.addEventListener("click", startBGM, { once: true });
+window.addEventListener("touchstart", startBGM, { once: true });
 
-    // 音量
-    volume.addEventListener("input", () => {
-      bgm.volume = volume.value;
-    });
-  </script>
+toggle.onclick = () => {
+  if (bgm.paused) {
+    bgm.play();
+    toggle.textContent = "⏸";
+  } else {
+    bgm.pause();
+    toggle.textContent = "▶";
+  }
+};
+
+volume.oninput = () => {
+  bgm.volume = volume.value;
+};
+</script>
+
 </body>
 </html>
