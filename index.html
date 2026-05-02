@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cygnus Ash</title>
 
 <style>
@@ -11,220 +11,103 @@
 html, body {
   margin: 0;
   height: 100dvh;
-  overflow: hidden;
   background: #000;
+  overflow: hidden;
   font-family: serif;
+  cursor: pointer;
 }
 
 /* ===== イントロ ===== */
 .intro {
   position: fixed;
   inset: 0;
-  z-index: 10;
-  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
 
+/* 完全黒＋微光 */
 .bg {
   position: absolute;
-  inset: -20px;
-  background: url("./TopPage/TopPage.png") center / cover no-repeat;
-  filter: blur(12px) brightness(0.7);
-  transform: scale(1.08);
-  transition: 1.2s;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, #111 0%, #000 70%);
+  transition: 1.2s ease;
 }
 
-.intro.open .bg {
-  filter: blur(0);
-  transform: scale(1.02);
+/* 微光レイヤー */
+.glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.05), transparent 60%);
+  opacity: 1;
+  transition: 1s;
 }
 
 .content {
   position: relative;
   z-index: 2;
-  height: 100%;
-  display: grid;
-  place-items: center;
+  text-align: center;
 }
 
 h1 {
-  color: white;
+  color: rgba(255,255,255,0.9);
   font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
 
-/* ===== メイン ===== */
-#main {
+.hint {
+  margin-top: 1rem;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+/* クリック後 */
+.intro.open .glow {
   opacity: 0;
-  transition: opacity 1.2s;
 }
 
-#main.show {
-  opacity: 1;
-}
-
-/* ===== 雪 ===== */
-#snow {
-  position: fixed;
-  inset: 0;
-}
-
-/* ===== UI ===== */
-.audio-ui {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 20;
-  display: flex;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.4);
-}
-
-.audio-ui button {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-.audio-ui input {
-  width: 80px;
+.intro.open h1 {
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.05);
+  transition: 1s;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🎵 BGM -->
-<audio id="bgm" src="./TopPage/bgm.mp3" loop playsinline></audio>
-
-<!-- イントロ -->
 <div class="intro" id="intro">
   <div class="bg"></div>
+  <div class="glow"></div>
+
   <div class="content">
     <h1>Ash</h1>
-  </div>
-</div>
-
-<!-- メイン -->
-<div id="main">
-  <canvas id="snow"></canvas>
-
-  <div class="audio-ui">
-    <button id="toggle">▶</button>
-    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+    <div class="hint">click to enter</div>
   </div>
 </div>
 
 <script>
-// ===== BGM =====
-const bgm = document.getElementById("bgm");
-const toggle = document.getElementById("toggle");
-const volume = document.getElementById("volume");
-
-bgm.volume = 0.5;
-
-toggle.onclick = () => {
-  if (bgm.paused) {
-    bgm.play();
-    toggle.textContent = "⏸";
-  } else {
-    bgm.pause();
-    toggle.textContent = "▶";
-  }
-};
-
-volume.oninput = () => {
-  bgm.volume = volume.value;
-};
-
-// ===== 開始処理 =====
 const intro = document.getElementById("intro");
-const main = document.getElementById("main");
+let opened = false;
 
-function start() {
+function openPage() {
+  if (opened) return;
+  opened = true;
+
   intro.classList.add("open");
 
-  // 👇 ぼやけ解除後にBGM開始
+  // 少し余韻持たせて遷移
   setTimeout(() => {
-    bgm.volume = 0;
-    bgm.play().catch(()=>{});
-
-    let v = 0;
-    const fade = setInterval(() => {
-      v += 0.02;
-      bgm.volume = v;
-      if (v >= 0.5) clearInterval(fade);
-    }, 100);
-  }, 1000);
-
-  // 画面切替
-  setTimeout(() => {
-    intro.style.display = "none";
-    main.classList.add("show");
+    location.href = "./TopPage/snow.html";
   }, 1200);
 }
 
-intro.addEventListener("click", start, { once: true });
-intro.addEventListener("touchstart", start, { once: true });
-
-
-// ===== 雪 =====
-const canvas = document.getElementById("snow");
-const ctx = canvas.getContext("2d");
-
-let flakes = [];
-const count = window.innerWidth < 600 ? 120 : 230;
-
-function resize() {
-  const dpr = devicePixelRatio || 1;
-  canvas.width = innerWidth * dpr;
-  canvas.height = innerHeight * dpr;
-  canvas.style.width = innerWidth + "px";
-  canvas.style.height = innerHeight + "px";
-  ctx.scale(dpr, dpr);
-}
-
-function createFlake() {
-  return {
-    x: Math.random() * innerWidth,
-    y: Math.random() * innerHeight,
-    r: Math.random() * 2,
-    vy: Math.random() + 0.3
-  };
-}
-
-function init() {
-  flakes = [];
-  for (let i = 0; i < count; i++) {
-    flakes.push(createFlake());
-  }
-}
-
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  flakes.forEach(f => {
-    f.y += f.vy;
-    if (f.y > innerHeight) f.y = 0;
-
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-  });
-
-  requestAnimationFrame(draw);
-}
-
-resize();
-init();
-draw();
-
-window.onresize = () => {
-  resize();
-  init();
-};
+window.addEventListener("click", openPage);
+window.addEventListener("touchstart", openPage, { passive: true });
 </script>
 
 </body>
