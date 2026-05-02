@@ -5,55 +5,249 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cygnus Ash</title>
 
-<link rel="stylesheet" href="./snow.css">
+<style>
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100dvh;
+  background: #000;
+  overflow: hidden;
+  font-family: serif;
+  cursor: pointer;
+}
+
+/* ===== イントロ ===== */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #111, #000);
+  transition: 1.2s ease;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent);
+  transition: 1s;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+h1 {
+  color: white;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.1em;
+  transition: 1s;
+}
+
+.intro.open .glow {
+  opacity: 0;
+}
+
+.intro.open h1 {
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.05);
+}
+
+/* ===== メイン ===== */
+#main {
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+
+#main.show {
+  opacity: 1;
+}
+
+/* ===== 雪 ===== */
+#snow {
+  position: fixed;
+  inset: 0;
+}
+
+/* ===== UI ===== */
+.audio-ui {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: 1s;
+}
+
+.audio-ui.show {
+  opacity: 1;
+}
+
+button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+input {
+  width: 80px;
+}
+
+/* ===== メニュー ===== */
+.overlay-text {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 20px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.menu-btn {
+  pointer-events: auto;
+  color: white;
+  text-decoration: none;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  letter-spacing: 0.2em;
+
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 1s ease,
+    transform 1s ease,
+    text-shadow 0.2s ease;
+}
+
+.overlay-text.show .menu-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.overlay-text.show .menu-btn:nth-child(1) {
+  transition-delay: 0.2s;
+}
+.overlay-text.show .menu-btn:nth-child(2) {
+  transition-delay: 0.6s;
+}
+
+.menu-btn:hover {
+  text-shadow: 0 0 20px rgba(255,255,255,0.6);
+}
+
+.menu-btn:active {
+  transform: scale(0.92);
+  text-shadow: 0 0 30px rgba(255,255,255,1);
+}
+
+.menu-btn:visited {
+  color: white;
+}
+
+/* ===== 選択演出 ===== */
+.overlay-text.selecting .menu-btn {
+  opacity: 0.15;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.overlay-text.selecting .menu-btn.selected {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1.08);
+  text-shadow: 0 0 40px rgba(255,255,255,0.9);
+}
+
+.overlay-text.centering .menu-btn.selected {
+  transform: scale(1.15);
+}
+</style>
 </head>
 
 <body>
 
-<audio id="bgm" src="./bgm.mp3" loop playsinline></audio>
+<audio id="bgm" src="./TopPage/bgm.mp3" loop playsinline></audio>
 
-<canvas id="snow"></canvas>
-
-<div class="audio-ui">
-  <button id="toggle">▶</button>
-  <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+<div class="intro" id="intro">
+  <div class="bg"></div>
+  <div class="glow"></div>
+  <div class="content">
+    <h1>Ash</h1>
+  </div>
 </div>
 
-<main class="hero">
-  <h1>Cygnus Ash</h1>
-</main>
+<div id="main">
+  <canvas id="snow"></canvas>
+
+  <!-- メニュー -->
+  <div class="overlay-text" id="overlayText">
+    <a href="./kill.html" class="menu-btn">Kill Clip</a>
+    <a href="./combat.html" class="menu-btn">Combat Log</a>
+  </div>
+
+  <div class="audio-ui" id="ui">
+    <button id="toggle">⏸</button>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+  </div>
+</div>
 
 <script src="./snow.js"></script>
 
 <script>
+const intro = document.getElementById("intro");
+const main = document.getElementById("main");
+const ui = document.getElementById("ui");
+
 const bgm = document.getElementById("bgm");
 const toggle = document.getElementById("toggle");
 const volume = document.getElementById("volume");
 
-bgm.volume = 0.5;
+const overlay = document.getElementById("overlayText");
 
+bgm.volume = 0;
 let started = false;
 
-// 👇 最初のタップで再生
-function startBGM() {
+function startExperience() {
   if (started) return;
   started = true;
 
-  bgm.volume = 0;
-  bgm.play().catch(()=>{});
+  intro.classList.add("open");
 
-  let v = 0;
-  const fade = setInterval(()=>{
-    v += 0.02;
-    bgm.volume = v;
-    if(v >= 0.5) clearInterval(fade);
-  },100);
+  setTimeout(() => {
+    bgm.play().catch(()=>{});
 
-  toggle.textContent = "⏸";
+    let v = 0;
+    const fade = setInterval(()=>{
+      v += 0.02;
+      bgm.volume = v;
+      if(v >= 0.5) clearInterval(fade);
+    },100);
+
+    ui.classList.add("show");
+
+  }, 1000);
+
+  setTimeout(() => {
+    intro.style.display = "none";
+    main.classList.add("show");
+  }, 1200);
 }
-
-window.addEventListener("click", startBGM, { once: true });
-window.addEventListener("touchstart", startBGM, { once: true });
 
 toggle.onclick = () => {
   if (bgm.paused) {
@@ -68,6 +262,39 @@ toggle.onclick = () => {
 volume.oninput = () => {
   bgm.volume = volume.value;
 };
+
+window.addEventListener("click", startExperience, { once: true });
+window.addEventListener("touchstart", startExperience, { once: true });
+
+/* ===== メニュー表示 ===== */
+setTimeout(() => {
+  overlay.classList.add("show");
+}, 2000);
+
+/* ===== 選択演出 ===== */
+document.querySelectorAll(".menu-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const href = btn.getAttribute("href");
+
+    overlay.classList.add("selecting");
+    btn.classList.add("selected");
+
+    setTimeout(() => {
+      overlay.classList.add("centering");
+    }, 200);
+
+    setTimeout(() => {
+      document.body.style.transition = "opacity 0.4s";
+      document.body.style.opacity = "0";
+
+      setTimeout(() => {
+        location.href = href;
+      }, 400);
+    }, 600);
+  });
+});
 </script>
 
 </body>
