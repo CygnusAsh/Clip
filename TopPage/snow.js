@@ -12,13 +12,19 @@ const overlay = document.getElementById("overlayText");
 bgm.volume = 0;
 let started = false;
 
-/* ===== 雪 ===== */
+/* ===== 雪（背景） ===== */
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
 let flakes = [];
 const count = innerWidth < 600 ? 120 : 200;
 
+/* ===== カーソル雪 ===== */
+let cursorFlakes = [];
+let mouseX = 0;
+let mouseY = 0;
+
+/* ===== リサイズ ===== */
 function resize() {
   const dpr = devicePixelRatio || 1;
   canvas.width = innerWidth * dpr;
@@ -29,6 +35,7 @@ function resize() {
   ctx.scale(dpr,dpr);
 }
 
+/* ===== 雪生成 ===== */
 function createFlake() {
   return {
     x: Math.random()*innerWidth,
@@ -43,9 +50,11 @@ function initSnow() {
   for(let i=0;i<count;i++) flakes.push(createFlake());
 }
 
+/* ===== アニメーション ===== */
 function animateSnow() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
+  // 背景の雪
   flakes.forEach(f=>{
     f.y += f.vy;
     if(f.y > innerHeight) f.y = 0;
@@ -56,8 +65,64 @@ function animateSnow() {
     ctx.fill();
   });
 
+  // カーソル雪
+  for (let i = cursorFlakes.length - 1; i >= 0; i--) {
+    const f = cursorFlakes[i];
+
+    f.x += f.vx;
+    f.y += f.vy;
+    f.vy += 0.03;
+    f.life--;
+
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${f.life / 60})`;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "white";
+    ctx.fill();
+
+    if (f.life <= 0) {
+      cursorFlakes.splice(i, 1);
+    }
+  }
+
   requestAnimationFrame(animateSnow);
 }
+
+/* ===== マウス追従 ===== */
+window.addEventListener("mousemove", (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+
+  for(let i=0;i<2;i++){
+    cursorFlakes.push({
+      x: mouseX,
+      y: mouseY,
+      r: Math.random()*2 + 0.5,
+      vx: (Math.random()-0.5)*1.5,
+      vy: Math.random()*-1.5 - 0.5,
+      life: 60
+    });
+  }
+});
+
+/* ===== スマホ対応 ===== */
+window.addEventListener("touchmove", (e) => {
+  const t = e.touches[0];
+  mouseX = t.clientX;
+  mouseY = t.clientY;
+
+  for(let i=0;i<2;i++){
+    cursorFlakes.push({
+      x: mouseX,
+      y: mouseY,
+      r: Math.random()*2 + 0.5,
+      vx: (Math.random()-0.5)*1.5,
+      vy: Math.random()*-1.5 - 0.5,
+      life: 60
+    });
+  }
+});
 
 /* ===== 開始 ===== */
 function startExperience() {
