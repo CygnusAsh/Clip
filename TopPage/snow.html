@@ -4,37 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project Aincrad</title>
-
 <link rel="stylesheet" href="./snow.css">
 </head>
 
 <body>
 
-<audio id="bgm" src="./TopPage/bgm.mp3" loop playsinline></audio>
+<audio id="bgm" src="./TopPage/bgm.mp3" loop></audio>
 
-<!-- イントロ -->
 <div class="intro" id="intro">
-  <div class="bg"></div>
-  <div class="glow"></div>
-  <div class="content">
-    <h1>Project Aincrad</h1>
-  </div>
+  <h1>project Aincrad</h1>
 </div>
 
-<!-- メイン -->
 <div id="main">
   <canvas id="snow"></canvas>
 
-  <!-- メニュー -->
-  <div class="overlay-text" id="overlayText">
-    <a href="./kill.html" class="menu-btn">Kill Clip</a>
-    <a href="./combat.html" class="menu-btn">Combat Log</a>
-  </div>
-
-  <!-- UI -->
-  <div class="audio-ui" id="ui">
-    <button id="toggle">⏸</button>
-    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+  <div id="overlayText" class="overlay-text">
+    <a href="#" class="menu-btn">Kill Clip</a>
+    <a href="#" class="menu-btn">Combat Log</a>
   </div>
 </div>
 
