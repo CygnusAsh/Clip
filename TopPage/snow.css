@@ -3,52 +3,169 @@
 html, body {
   margin: 0;
   height: 100dvh;
-  overflow: hidden;
-}
-
-body {
   background: #000;
-  color: white;
+  overflow: hidden;
   font-family: serif;
+  cursor: pointer;
 }
 
+/* ===== イントロ ===== */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #111, #000);
+  transition: 1.2s ease;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent);
+  transition: 1s;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+h1 {
+  color: white;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.1em;
+  transition: 1s;
+}
+
+.intro.open .glow {
+  opacity: 0;
+}
+
+.intro.open h1 {
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.05);
+}
+
+/* ===== メイン ===== */
+#main {
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+
+#main.show {
+  opacity: 1;
+}
+
+/* ===== 雪 ===== */
 #snow {
   position: fixed;
   inset: 0;
 }
 
-.hero {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-  display: grid;
-  place-items: center;
-}
-
-.hero h1 {
-  font-size: clamp(3rem, 8vw, 6rem);
-  text-shadow: 0 0 20px rgba(255,255,255,0.2);
-}
-
+/* ===== UI ===== */
 .audio-ui {
   position: fixed;
   top: 12px;
   left: 12px;
-  z-index: 3;
+  z-index: 20;
   display: flex;
   gap: 10px;
   padding: 8px 12px;
   border-radius: 999px;
   background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: 1s;
 }
 
-.audio-ui button {
+.audio-ui.show {
+  opacity: 1;
+}
+
+button {
   background: none;
   border: none;
   color: white;
   cursor: pointer;
 }
 
-.audio-ui input {
+input {
   width: 80px;
+}
+
+/* ===== メニュー ===== */
+.overlay-text {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 20px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.menu-btn {
+  pointer-events: auto;
+  color: white;
+  text-decoration: none;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  letter-spacing: 0.2em;
+
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 1s ease,
+    transform 1s ease,
+    text-shadow 0.2s ease;
+}
+
+.overlay-text.show .menu-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.overlay-text.show .menu-btn:nth-child(1) {
+  transition-delay: 0.2s;
+}
+.overlay-text.show .menu-btn:nth-child(2) {
+  transition-delay: 0.6s;
+}
+
+.menu-btn:hover {
+  text-shadow: 0 0 20px rgba(255,255,255,0.6);
+}
+
+.menu-btn:active {
+  transform: scale(0.92);
+  text-shadow: 0 0 30px rgba(255,255,255,1);
+}
+
+.menu-btn:visited {
+  color: white;
+}
+
+/* ===== 選択演出 ===== */
+.overlay-text.selecting .menu-btn {
+  opacity: 0.15;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.overlay-text.selecting .menu-btn.selected {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1.08);
+  text-shadow: 0 0 40px rgba(255,255,255,0.9);
+}
+
+.overlay-text.centering .menu-btn.selected {
+  transform: scale(1.15);
 }
