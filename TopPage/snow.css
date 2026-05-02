@@ -5,25 +5,23 @@
 html, body {
   margin: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   overflow: hidden;
 }
 
 body {
-  position: relative;
   font-family: "Georgia", "Yu Mincho", serif;
   color: white;
 
   background:
     linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.55)),
-    url("./TopPage.png") center center / cover no-repeat fixed;
+    url("./TopPage.png") center / cover no-repeat fixed;
 }
 
 body::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 1;
   pointer-events: none;
   background:
     radial-gradient(circle at 50% 80%, rgba(255,255,255,0.08), transparent 38%),
@@ -35,7 +33,6 @@ body::after {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
   pointer-events: none;
 }
 
@@ -46,16 +43,17 @@ body::after {
   display: grid;
   place-items: center;
   text-align: center;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 400;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
   letter-spacing: 0.05em;
-  text-shadow:
-    0 0 12px rgba(255,255,255,0.18),
-    0 0 28px rgba(255,255,255,0.08),
-    0 2px 12px rgba(0,0,0,0.72);
+}
+
+@media (max-width: 600px) {
+  .hero h1 {
+    letter-spacing: 0.03em;
+  }
 }
