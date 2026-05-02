@@ -2,7 +2,7 @@ const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
 let flakes = [];
-const flakeCount = 130;
+const flakeCount = 230;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
