@@ -2,7 +2,7 @@ const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
 let flakes = [];
-const flakeCount = 230;
+const flakeCount = window.innerWidth < 600 ? 120 : 230;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -48,11 +48,9 @@ function drawFlake(flake) {
 let time = 0;
 
 function animateSnow() {
-  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let i = 0; i < flakes.length; i++) {
-    const f = flakes[i];
-
+  flakes.forEach((f, i) => {
     f.y += f.speedY;
     f.x += f.speedX + Math.sin((f.y + time) * f.swing) * 0.45;
 
@@ -61,18 +59,21 @@ function animateSnow() {
       f.x < -20 ||
       f.x > window.innerWidth + 20
     ) {
-      flakes[i] = createFlake(false);
+      flakes[i] = createFlake();
       flakes[i].x = Math.random() * window.innerWidth;
     }
 
     drawFlake(f);
-  }
+  });
 
-  time += 1;
+  time++;
   requestAnimationFrame(animateSnow);
 }
 
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  initSnow();
+});
 
 resizeCanvas();
 initSnow();
