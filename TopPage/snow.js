@@ -6,10 +6,6 @@ const main = document.getElementById("main");
 const overlay = document.getElementById("overlayText");
 
 const bgm = document.getElementById("bgm");
-const toggle = document.getElementById("toggle");
-const volume = document.getElementById("volume");
-
-bgm.volume = 0;
 
 // ===== Canvas =====
 const canvas = document.getElementById("snow");
@@ -87,8 +83,6 @@ window.addEventListener("mousemove",e=>{
 // ===== 開始 =====
 window.addEventListener("click",()=>{
 
-  intro.classList.add("open");
-
   setTimeout(()=>{
     intro.style.display="none";
     main.classList.add("show");
@@ -99,36 +93,15 @@ window.addEventListener("click",()=>{
 
     // BGM
     bgm.play().catch(()=>{});
-    let v=0;
-    const fade=setInterval(()=>{
-      v+=0.02;
-      bgm.volume=v;
-      if(v>=0.5) clearInterval(fade);
-    },100);
 
-    // メニュー表示（確実にここで出る）
+    // メニュー表示
     setTimeout(()=>{
       overlay.classList.add("show");
     },1500);
 
-  },1000);
+  },500);
 
 },{once:true});
-
-// ===== UI =====
-toggle.onclick = ()=>{
-  if(bgm.paused){
-    bgm.play();
-    toggle.textContent="⏸";
-  }else{
-    bgm.pause();
-    toggle.textContent="▶";
-  }
-};
-
-volume.oninput = ()=>{
-  bgm.volume = volume.value;
-};
 
 // ===== 選択 =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
@@ -137,10 +110,6 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
-
-    setTimeout(()=>{
-      location.href = btn.href;
-    },500);
   });
 });
 
