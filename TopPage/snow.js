@@ -1,16 +1,6 @@
-// ===== 要素 =====
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
-const ui = document.getElementById("ui");
-
-const bgm = document.getElementById("bgm");
-const toggle = document.getElementById("toggle");
-const volume = document.getElementById("volume");
-
 const overlay = document.getElementById("overlayText");
-
-bgm.volume = 0;
-let started = false;
 
 /* ===== 雪 ===== */
 const canvas = document.getElementById("snow");
@@ -19,164 +9,99 @@ const ctx = canvas.getContext("2d");
 let flakes = [];
 let cursorFlakes = [];
 
-const count = innerWidth < 600 ? 120 : 200;
-
-function resize() {
-  const dpr = devicePixelRatio || 1;
-  canvas.width = innerWidth * dpr;
-  canvas.height = innerHeight * dpr;
-  canvas.style.width = innerWidth + "px";
-  canvas.style.height = innerHeight + "px";
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(dpr,dpr);
+function resize(){
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 }
 
-function createFlake() {
+function createFlake(){
   return {
-    x: Math.random()*innerWidth,
-    y: Math.random()*innerHeight,
-    r: Math.random()*2,
-    vy: Math.random()+0.3
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*2,
+    vy:Math.random()+0.3
   };
 }
 
-function initSnow() {
-  flakes = [];
-  for(let i=0;i<count;i++) flakes.push(createFlake());
+function init(){
+  flakes=[];
+  for(let i=0;i<150;i++) flakes.push(createFlake());
 }
 
-function animateSnow() {
+function animate(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   // 背景雪
   flakes.forEach(f=>{
-    f.y += f.vy;
-    if(f.y > innerHeight) f.y = 0;
+    f.y+=f.vy;
+    if(f.y>innerHeight)f.y=0;
 
     ctx.beginPath();
     ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-    ctx.fillStyle = "white";
+    ctx.fillStyle="white";
     ctx.fill();
   });
 
   // カーソル雪
-  for (let i = cursorFlakes.length - 1; i >= 0; i--) {
+  for(let i=cursorFlakes.length-1;i>=0;i--){
     const f = cursorFlakes[i];
 
-    f.x += f.vx;
-    f.y += f.vy;
-    f.vy += 0.03;
+    f.x+=f.vx;
+    f.y+=f.vy;
     f.life--;
 
     ctx.beginPath();
-    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${f.life / 60})`;
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = "white";
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,255,255,"+(f.life/60)+")";
     ctx.fill();
 
-    if (f.life <= 0) cursorFlakes.splice(i,1);
+    if(f.life<=0) cursorFlakes.splice(i,1);
   }
 
-  requestAnimationFrame(animateSnow);
+  requestAnimationFrame(animate);
 }
 
-/* ===== カーソル ===== */
-window.addEventListener("mousemove", (e) => {
-  for(let i=0;i<2;i++){
+/* カーソル */
+window.addEventListener("mousemove",e=>{
+  for(let i=0;i<3;i++){
     cursorFlakes.push({
-      x: e.clientX,
-      y: e.clientY,
-      r: Math.random()*2,
-      vx: (Math.random()-0.5)*1.5,
-      vy: Math.random()*-1.5,
-      life: 60
+      x:e.clientX,
+      y:e.clientY,
+      r:Math.random()*2,
+      vx:(Math.random()-0.5)*2,
+      vy:(Math.random()-1.5),
+      life:60
     });
   }
 });
 
-/* ===== 開始 ===== */
-function startExperience() {
-  if (started) return;
-  started = true;
+/* 開始 */
+window.addEventListener("click",()=>{
+  intro.style.display="none";
+  main.classList.add("show");
 
-  intro.classList.add("open");
+  resize();
+  init();
+  animate();
 
-  setTimeout(() => {
-    bgm.play().catch(()=>{});
+  // ★確実に出る
+  setTimeout(()=>{
+    overlay.classList.add("show");
+  },1500);
+},{once:true});
 
-    let v = 0;
-    const fade = setInterval(()=>{
-      v += 0.02;
-      bgm.volume = v;
-      if(v >= 0.5) clearInterval(fade);
-    },100);
-
-    resize();
-    initSnow();
-    animateSnow();
-
-    ui.classList.add("show");
-
-  }, 1000);
-
-  setTimeout(() => {
-    intro.style.display = "none";
-    main.classList.add("show");
-
-    // ★ここが修正ポイント
-    setTimeout(() => {
-      overlay.classList.add("show");
-    }, 2000);
-
-  }, 1200);
-}
-
-/* ===== UI ===== */
-toggle.onclick = () => {
-  if (bgm.paused) {
-    bgm.play();
-    toggle.textContent = "⏸";
-  } else {
-    bgm.pause();
-    toggle.textContent = "▶";
-  }
-};
-
-volume.oninput = () => {
-  bgm.volume = volume.value;
-};
-
-/* ===== 選択演出 ===== */
-document.querySelectorAll(".menu-btn").forEach(btn => {
-  btn.addEventListener("click", (e) => {
+/* 選択 */
+document.querySelectorAll(".menu-btn").forEach(btn=>{
+  btn.addEventListener("click",e=>{
     e.preventDefault();
-
-    const href = btn.getAttribute("href");
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
 
-    setTimeout(() => {
-      overlay.classList.add("centering");
-    }, 200);
-
-    setTimeout(() => {
-      document.body.style.transition = "opacity 0.4s";
-      document.body.style.opacity = "0";
-
-      setTimeout(() => {
-        location.href = href;
-      }, 400);
-    }, 600);
+    setTimeout(()=>{
+      alert("遷移ここ"); // 動作確認用
+    },500);
   });
 });
 
-/* ===== イベント ===== */
-window.addEventListener("click", startExperience, { once: true });
-window.addEventListener("touchstart", startExperience, { once: true });
-
-window.onresize = () => {
-  resize();
-  initSnow();
-};
+window.onresize=resize;
