@@ -79,7 +79,7 @@ h1 {
   inset: 0;
 }
 
-/* ===== タイトル（発光） ===== */
+/* ===== タイトル ===== */
 .title{
   position:fixed;
   top:80px;
@@ -156,13 +156,11 @@ input {
   transition:1s;
 }
 
-/* 表示 */
 .overlay-text.show .menu-btn{
   opacity:1;
   transform:none;
 }
 
-/* 選択 */
 .overlay-text.selecting .menu-btn{
   opacity:0.2;
 }
@@ -172,7 +170,6 @@ input {
   transform:scale(1.1);
 }
 
-/* 🔥 ホバー発光 */
 .menu-btn:hover{
   text-shadow:
     0 0 15px #fff,
@@ -181,7 +178,6 @@ input {
   transform:scale(1.1);
 }
 
-/* スマホ */
 @media (max-width:600px){
   .overlay-text{
     flex-direction:column;
@@ -200,7 +196,6 @@ input {
 
 <audio id="bgm" src="TopPage/bgm.mp3" loop playsinline></audio>
 
-<!-- イントロ -->
 <div class="intro" id="intro">
   <div class="bg"></div>
   <div class="glow"></div>
@@ -209,20 +204,16 @@ input {
   </div>
 </div>
 
-<!-- メイン -->
 <div id="main">
   <canvas id="snow"></canvas>
 
-  <!-- タイトル -->
   <h1 class="title">Project Aincrad</h1>
 
-  <!-- メニュー -->
   <div id="overlayText" class="overlay-text">
     <a href="KillClip/KillClip.html" class="menu-btn">Kill Clip</a>
     <a href="CombatLog/CombatLog.html" class="menu-btn">Combat Log</a>
   </div>
 
-  <!-- UI -->
   <div class="audio-ui" id="ui">
     <button id="toggle">⏸</button>
     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
@@ -243,13 +234,6 @@ const volume = document.getElementById("volume");
 bgm.volume = 0;
 
 let started = false;
-
-// ===== 再生位置保存 =====
-setInterval(()=>{
-  if(!bgm.paused){
-    sessionStorage.setItem("bgmTime", bgm.currentTime);
-  }
-},500);
 
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
@@ -368,10 +352,14 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
-// メニュー
+// ===== メニュー（修正済み） =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
+
+    // ★ BGM停止
+    bgm.pause();
+    bgm.currentTime = 0;
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
