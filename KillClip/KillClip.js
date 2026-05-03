@@ -1,7 +1,7 @@
 // ===== JSON読み込み =====
 let clips = [];
 
-fetch("./KillClip.json") // ← ★ここ重要
+fetch("./KillClip.json")
   .then(res => res.json())
   .then(data => {
     clips = data;
@@ -13,17 +13,13 @@ fetch("./KillClip.json") // ← ★ここ重要
 
 // ===== 日付ソート =====
 function sortByDate(list){
-  return list.sort((a,b)=>{
-    return new Date(b.date) - new Date(a.date);
-  });
+  return list.sort((a,b)=> new Date(b.date) - new Date(a.date));
 }
 
 // ===== カード生成 =====
 const container = document.getElementById("cardContainer");
 
 function renderClips(list){
-  if(!container) return;
-
   container.innerHTML = "";
 
   list.forEach(c=>{
@@ -33,9 +29,9 @@ function renderClips(list){
     const thumb = c.thumbnail ? c.thumbnail : "../KCS/default.png";
 
     card.innerHTML = `
-      <div class="card-id">${c.id || ""}</div>
-      <div class="card-player">${c.player || ""}</div>
-      <div class="card-date">${c.date || ""}</div>
+      <div>${c.id}</div>
+      <div>${c.player}</div>
+      <div>${c.date}</div>
 
       <button class="profile-btn">Profile</button>
 
@@ -44,10 +40,13 @@ function renderClips(list){
       </div>
     `;
 
-    // 🎥 動画
-    card.querySelector(".thumb").onclick = ()=>{
-      if(c.video) openModal(c.video);
-    };
+    // 🎥 動画クリック
+    const img = card.querySelector(".thumb");
+    if(img){
+      img.addEventListener("click", ()=>{
+        if(c.video) openModal(c.video);
+      });
+    }
 
     // 👤 プロフィール
     card.querySelector(".profile-btn").onclick = (e)=>{
@@ -66,122 +65,43 @@ const modal = document.getElementById("modal");
 const modalVideo = document.getElementById("modalVideo");
 
 function openModal(src){
-  if(!modal || !modalVideo) return;
+  console.log("再生:", src); // ★デバッグ用
 
   modal.style.display = "flex";
+
   modalVideo.src = src;
   modalVideo.currentTime = 0;
-  modalVideo.play();
-}
 
-if(modal){
-  modal.onclick = ()=>{
-    modal.style.display = "none";
-    modalVideo.pause();
-    modalVideo.src = "";
-  };
-}
-
-// ===== 🔍 検索 =====
-window.addEventListener("DOMContentLoaded", ()=>{
-
-  const input = document.getElementById("searchInput");
-  if(!input) return;
-
-  input.addEventListener("input", ()=>{
-    if(!clips.length) return;
-
-    const value = input.value;
-
-    // 空なら全部表示
-    if(!value){
-      renderClips(sortByDate([...clips]));
-      return;
-    }
-
-    const keyword = value.toLowerCase();
-
-    const filtered = clips.filter(c=>{
-      return (
-        (c.id && c.id.toLowerCase().includes(keyword)) ||
-        (c.player && c.player.toLowerCase().includes(keyword)) ||
-        (c.date && c.date.includes(value))
-      );
-    });
-
-    renderClips(sortByDate(filtered));
+  modalVideo.play().catch(err=>{
+    console.log("再生エラー:", err);
   });
+}
 
+// 閉じる
+modal.addEventListener("click", ()=>{
+  modal.style.display = "none";
+  modalVideo.pause();
+  modalVideo.src = "";
 });
 
-// ===== 雪 =====
-const canvas = document.getElementById("snow");
+// ===== 検索 =====
+document.getElementById("searchInput").addEventListener("input", e=>{
+  const value = e.target.value;
 
-if(canvas){
-  const ctx = canvas.getContext("2d");
-
-  let flakes = [];
-
-  function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+  if(!value){
+    renderClips(sortByDate([...clips]));
+    return;
   }
 
-  function createFlake(){
-    return {
-      x:Math.random()*innerWidth,
-      y:Math.random()*innerHeight,
-      r:Math.random()*2,
-      vy:Math.random()+0.3
-    };
-  }
+  const keyword = value.toLowerCase();
 
-  function init(){
-    flakes=[];
-    for(let i=0;i<150;i++) flakes.push(createFlake());
-  }
-
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    flakes.forEach(f=>{
-      f.y+=f.vy;
-      if(f.y>innerHeight) f.y=0;
-
-      ctx.beginPath();
-      ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-      ctx.fillStyle="white";
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
-  }
-
-  window.addEventListener("load", ()=>{
-    resize();
-    init();
-    animate();
+  const filtered = clips.filter(c=>{
+    return (
+      c.id.toLowerCase().includes(keyword) ||
+      c.player.toLowerCase().includes(keyword) ||
+      c.date.includes(value)
+    );
   });
 
-  window.addEventListener("resize", ()=>{
-    resize();
-    init();
-  });
-}
-
-// ===== フェード遷移 =====
-document.querySelectorAll("a").forEach(link=>{
-  link.addEventListener("click",e=>{
-    const href = link.getAttribute("href");
-
-    if(!href || href.startsWith("#")) return;
-
-    e.preventDefault();
-
-    document.body.classList.add("fade-out");
-
-    setTimeout(()=>{
-      window.location.href = href;
-    },800);
-  });
+  renderClips(sortByDate(filtered));
 });
