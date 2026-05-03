@@ -103,6 +103,13 @@ h1 {
   opacity:1;
 }
 
+/* ★ タイトルフェード */
+.title.fade{
+  opacity:0;
+  transform:translateX(-50%) scale(0.95);
+  filter:blur(6px);
+}
+
 /* ===== UI ===== */
 .audio-ui {
   position: fixed;
@@ -178,11 +185,13 @@ input {
   transform:scale(1.1);
 }
 
+/* ===== 画面フェード ===== */
 .fade-out{
   opacity:0;
   transition:1s;
 }
 
+/* スマホ */
 @media (max-width:600px){
   .overlay-text{
     flex-direction:column;
@@ -358,7 +367,7 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
-// ===== メニュー（BGMフェード付き） =====
+// ===== メニュー（最終安定版） =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
@@ -366,10 +375,20 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
     if(fading) return;
     fading = true;
 
+    const title = document.querySelector(".title");
+
+    // ① メニュー反応
     overlay.classList.add("selecting");
     btn.classList.add("selected");
 
-    // ★ BGMフェードアウト
+    // ② タイトル遅れてフェード
+    setTimeout(()=>{
+      if(title){
+        title.classList.add("fade");
+      }
+    },120);
+
+    // ③ BGMフェード（独立）
     let fade = setInterval(()=>{
       bgm.volume -= 0.05;
 
@@ -377,14 +396,18 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
         bgm.volume = 0;
         bgm.pause();
         clearInterval(fade);
-
-        document.body.classList.add("fade-out");
-
-        setTimeout(()=>{
-          window.location.href = btn.getAttribute("href");
-        },600);
       }
     },50);
+
+    // ④ 確実に遷移
+    setTimeout(()=>{
+      document.body.classList.add("fade-out");
+
+      setTimeout(()=>{
+        window.location.href = btn.getAttribute("href");
+      },600);
+
+    },400);
   });
 });
 
