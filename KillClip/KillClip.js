@@ -1,7 +1,7 @@
 // ===== JSON読み込み =====
 let clips = [];
 
-fetch("/Clip/KillClip/KillClip.json") // ★ここ超重要
+fetch("/Clip/KillClip/KillClip.json")
   .then(res => res.json())
   .then(data => {
     clips = data;
@@ -33,9 +33,9 @@ function renderClips(list){
     const thumb = c.thumbnail ? c.thumbnail : "/Clip/KCS/default.png";
 
     card.innerHTML = `
-      <div class="card-id">${c.id}</div>
-      <div class="card-player">${c.player}</div>
-      <div class="card-date">${c.date}</div>
+      <div class="card-id">${c.id || ""}</div>
+      <div class="card-player">${c.player || ""}</div>
+      <div class="card-date">${c.date || ""}</div>
 
       <button class="profile-btn">Profile</button>
 
@@ -44,9 +44,9 @@ function renderClips(list){
       </div>
     `;
 
-    // 🎥 動画再生
+    // 🎥 動画
     card.querySelector(".thumb").onclick = ()=>{
-      openModal(c.video);
+      if(c.video) openModal(c.video);
     };
 
     // 👤 プロフィール
@@ -61,40 +61,52 @@ function renderClips(list){
   });
 }
 
-// ===== 検索 =====
-const input = document.getElementById("searchInput");
-
-input.addEventListener("input", ()=>{
-  const keyword = input.value.toLowerCase();
-
-  const filtered = clips.filter(c=>{
-    return (
-      c.id.toLowerCase().includes(keyword) ||
-      c.player.toLowerCase().includes(keyword) ||
-      c.date.toLowerCase().includes(keyword)
-    );
-  });
-
-  renderClips(sortByDate(filtered));
-});
-
 // ===== モーダル =====
 const modal = document.getElementById("modal");
 const modalVideo = document.getElementById("modalVideo");
 
 function openModal(src){
+  if(!modal || !modalVideo) return;
+
   modal.style.display = "flex";
   modalVideo.src = src;
   modalVideo.currentTime = 0;
   modalVideo.play();
 }
 
-modal.onclick = ()=>{
-  modal.style.display = "none";
-  modalVideo.pause();
-};
+if(modal){
+  modal.onclick = ()=>{
+    modal.style.display = "none";
+    if(modalVideo) modalVideo.pause();
+  };
+}
 
-// ===== 雪 =====
+// ===== 🔍 検索（完全修正版） =====
+window.addEventListener("DOMContentLoaded", ()=>{
+
+  const input = document.getElementById("searchInput");
+
+  if(!input) return;
+
+  input.addEventListener("input", ()=>{
+    if(!clips.length) return;
+
+    const keyword = input.value.toLowerCase();
+
+    const filtered = clips.filter(c=>{
+      return (
+        (c.id && c.id.toLowerCase().includes(keyword)) ||
+        (c.player && c.player.toLowerCase().includes(keyword)) ||
+        (c.date && c.date.toLowerCase().includes(keyword))
+      );
+    });
+
+    renderClips(sortByDate(filtered));
+  });
+
+});
+
+// ===== 雪エフェクト =====
 const canvas = document.getElementById("snow");
 
 if(canvas){
