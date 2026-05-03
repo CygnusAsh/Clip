@@ -32,15 +32,15 @@ function renderClips(list){
 
       <button class="profile-btn">Profile</button>
 
-      <video src="${c.video}" muted></video>
+      <img src="${c.thumbnail}" class="thumb">
     `;
 
-    // 動画クリック
-    card.querySelector("video").onclick = ()=>{
+    // 🎥 サムネクリック → 動画再生
+    card.querySelector(".thumb").onclick = ()=>{
       openModal(c.video);
     };
 
-    // プロフィール
+    // 👤 プロフィール
     card.querySelector(".profile-btn").onclick = (e)=>{
       e.stopPropagation();
       window.open(c.profile, "_blank");
@@ -82,7 +82,7 @@ modal.onclick = ()=>{
   modalVideo.pause();
 };
 
-// ===== 雪 =====
+// ===== 雪（そのまま） =====
 const canvas = document.getElementById("snow");
 
 if(canvas){
