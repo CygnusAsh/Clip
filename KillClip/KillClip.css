@@ -34,7 +34,6 @@ body{
   transition:0.3s;
 }
 
-/* 🔥 ホバー */
 .site-title:hover{
   text-shadow:
     0 0 15px #fff,
@@ -82,7 +81,7 @@ body{
 /* ===== カード ===== */
 .card-container{
   display:grid;
-  grid-template-columns:repeat(4, 1fr); /* ← 横4つ固定 */
+  grid-template-columns:repeat(4, 1fr);
   gap:20px;
   padding:20px;
   max-width:1200px;
@@ -96,11 +95,40 @@ body{
   cursor:pointer;
   transition:0.3s;
   position:relative;
+  overflow:hidden;
 }
 
+/* 🔥 ホバー基本 */
 .card:hover{
   transform:scale(1.05);
-  box-shadow:0 0 20px rgba(255,255,255,0.2);
+  box-shadow:
+    0 0 20px rgba(255,255,255,0.2),
+    0 0 40px rgba(255,255,255,0.1);
+}
+
+/* ===== 流れる白い枠 ===== */
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:50%;
+  height:100%;
+  background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.8),
+    transparent
+  );
+}
+
+.card:hover::before{
+  animation:shine 1s forwards;
+}
+
+@keyframes shine{
+  0%{ left:-100%; }
+  100%{ left:150%; }
 }
 
 /* ===== テキスト ===== */
@@ -145,7 +173,7 @@ body{
   transform:translate(-50%,-50%);
   font-size:2rem;
   color:white;
-  opacity:0.8;
+  opacity:0.85;
   pointer-events:none;
 
   text-shadow:
@@ -173,7 +201,7 @@ body{
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.8);
+  background:rgba(0,0,0,0.85);
   display:none;
   justify-content:center;
   align-items:center;
@@ -183,6 +211,7 @@ body{
 .modal video{
   width:80%;
   max-width:800px;
+  border-radius:10px;
 }
 
 /* ===== フェード ===== */
