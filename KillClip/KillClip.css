@@ -6,12 +6,12 @@ body{
   overflow-x:hidden;
 }
 
-/* ❄ 雪（クリックを邪魔しない） */
+/* ❄ 雪（クリックを通す） */
 #snow{
   position:fixed;
   inset:0;
   z-index:0;
-  pointer-events:none; /* ★これ追加 */
+  pointer-events:none;
 }
 
 /* ===== ヘッダー ===== */
@@ -33,16 +33,6 @@ body{
   text-shadow:
     0 0 10px rgba(255,255,255,0.4),
     0 0 20px rgba(255,255,255,0.3);
-
-  transition:0.3s;
-}
-
-.site-title:hover{
-  text-shadow:
-    0 0 15px #fff,
-    0 0 30px #fff,
-    0 0 60px #fff;
-  transform:scale(1.05);
 }
 
 /* ===== 検索 ===== */
@@ -58,7 +48,6 @@ body{
   background:#111;
   border:1px solid rgba(255,255,255,0.2);
   color:white;
-  border-radius:4px;
 }
 
 /* ===== カード ===== */
@@ -77,6 +66,8 @@ body{
   background:#111;
   padding:15px;
   border-radius:10px;
+  position:relative;
+  z-index:5;
 }
 
 /* サムネ */
@@ -90,7 +81,9 @@ body{
   width:100%;
   height:100%;
   object-fit:cover;
-  cursor:pointer; /* ★クリックできるように */
+  cursor:pointer;
+  position:relative;
+  z-index:10; /* ★最前面 */
 }
 
 /* ===== モーダル ===== */
@@ -101,7 +94,7 @@ body{
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:999; /* ★最前面 */
+  z-index:999;
 }
 
 .modal video{
