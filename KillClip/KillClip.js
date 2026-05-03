@@ -1,3 +1,19 @@
+// ===== BGM =====
+const bgm = new Audio("../TopPage/bgm.mp3");
+bgm.loop = true;
+bgm.volume = 0.5;
+
+// 再生位置復元
+const savedTime = sessionStorage.getItem("bgmTime");
+if(savedTime){
+  bgm.currentTime = savedTime;
+}
+
+// 初回クリックで再生
+window.addEventListener("click", ()=>{
+  bgm.play().catch(()=>{});
+}, { once:true });
+
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
@@ -39,23 +55,19 @@ function animate(){
   requestAnimationFrame(animate);
 }
 
-// ===== フェード遷移 =====
+// フェード
 document.querySelectorAll("a").forEach(link=>{
   link.addEventListener("click",e=>{
-    const href = link.getAttribute("href");
-    if(!href || href.startsWith("#")) return;
-
     e.preventDefault();
 
     document.body.classList.add("fade-out");
 
     setTimeout(()=>{
-      window.location.href = href;
+      window.location.href = link.href;
     },800);
   });
 });
 
-// 初期化
 window.onload = ()=>{
   resize();
   init();
