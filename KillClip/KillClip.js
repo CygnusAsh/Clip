@@ -1,7 +1,7 @@
 // ===== JSON読み込み =====
 let clips = [];
 
-fetch("KillClip.json")
+fetch("/Clip/KillClip/KillClip.json") // ← ★パス修正
   .then(res => res.json())
   .then(data => {
     clips = data;
@@ -22,30 +22,35 @@ function sortByDate(list){
 const container = document.getElementById("cardContainer");
 
 function renderClips(list){
+  if(!container) return; // ← ★安全対策
+
   container.innerHTML = "";
 
   list.forEach(c=>{
     const card = document.createElement("div");
     card.className = "card";
 
+    // ★ サムネ無いときの保険
+    const thumb = c.thumbnail ? c.thumbnail : "/Clip/KCS/default.png";
+
     card.innerHTML = `
-      <div class="card-id">${c.id}</div>
-      <div class="card-player">${c.player}</div>
-      <div class="card-date">${c.date}</div>
+      <div class="card-id">${c.id || ""}</div>
+      <div class="card-player">${c.player || ""}</div>
+      <div class="card-date">${c.date || ""}</div>
 
       <button class="profile-btn">Profile</button>
 
       <div class="thumb-wrapper">
-        <img src="${c.thumbnail}" class="thumb">
+        <img src="${thumb}" class="thumb">
       </div>
     `;
 
-    // 🎥 サムネクリック → 動画再生
+    // 🎥 動画
     card.querySelector(".thumb").onclick = ()=>{
-      openModal(c.video);
+      if(c.video) openModal(c.video);
     };
 
-    // 👤 プロフィールボタン
+    // 👤 プロフィール
     card.querySelector(".profile-btn").onclick = (e)=>{
       e.stopPropagation();
       if(c.profile){
@@ -60,35 +65,43 @@ function renderClips(list){
 // ===== 検索 =====
 const input = document.getElementById("searchInput");
 
-input.addEventListener("input", ()=>{
-  const keyword = input.value.toLowerCase();
+if(input){
+  input.addEventListener("input", ()=>{
+    const keyword = input.value.toLowerCase();
 
-  const filtered = clips.filter(c=>{
-    return (
-      c.id.toLowerCase().includes(keyword) ||
-      c.player.toLowerCase().includes(keyword) ||
-      c.date.toLowerCase().includes(keyword)
-    );
+    const filtered = clips.filter(c=>{
+      return (
+        (c.id && c.id.toLowerCase().includes(keyword)) ||
+        (c.player && c.player.toLowerCase().includes(keyword)) ||
+        (c.date && c.date.toLowerCase().includes(keyword))
+      );
+    });
+
+    renderClips(sortByDate(filtered));
   });
-
-  renderClips(sortByDate(filtered));
-});
+}
 
 // ===== モーダル =====
 const modal = document.getElementById("modal");
 const modalVideo = document.getElementById("modalVideo");
 
 function openModal(src){
+  if(!modal || !modalVideo) return;
+
   modal.style.display = "flex";
   modalVideo.src = src;
   modalVideo.currentTime = 0;
   modalVideo.play();
 }
 
-modal.onclick = ()=>{
-  modal.style.display = "none";
-  modalVideo.pause();
-};
+if(modal){
+  modal.onclick = ()=>{
+    modal.style.display = "none";
+    if(modalVideo){
+      modalVideo.pause();
+    }
+  };
+}
 
 // ===== 雪エフェクト =====
 const canvas = document.getElementById("snow");
