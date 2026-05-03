@@ -30,6 +30,7 @@ function renderClips(list){
     const card = document.createElement("div");
     card.className = "card";
 
+    // サムネ保険
     const thumb = c.thumbnail ? c.thumbnail : "/Clip/KCS/default.png";
 
     card.innerHTML = `
@@ -44,18 +45,24 @@ function renderClips(list){
       </div>
     `;
 
-    // 🎥 動画
-    card.querySelector(".thumb").onclick = ()=>{
-      if(c.video) openModal(c.video);
-    };
+    // 🎥 動画再生
+    const img = card.querySelector(".thumb");
+    if(img){
+      img.onclick = ()=>{
+        if(c.video) openModal(c.video);
+      };
+    }
 
     // 👤 プロフィール
-    card.querySelector(".profile-btn").onclick = (e)=>{
-      e.stopPropagation();
-      if(c.profile){
-        window.open(c.profile, "_blank");
-      }
-    };
+    const btn = card.querySelector(".profile-btn");
+    if(btn){
+      btn.onclick = (e)=>{
+        e.stopPropagation();
+        if(c.profile){
+          window.open(c.profile, "_blank");
+        }
+      };
+    }
 
     container.appendChild(card);
   });
@@ -77,7 +84,10 @@ function openModal(src){
 if(modal){
   modal.onclick = ()=>{
     modal.style.display = "none";
-    if(modalVideo) modalVideo.pause();
+    if(modalVideo){
+      modalVideo.pause();
+      modalVideo.src = "";
+    }
   };
 }
 
