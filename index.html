@@ -108,12 +108,45 @@ button {
 input {
   width: 80px;
 }
+
+/* ===== メニュー ===== */
+.overlay-text{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  gap:20px;
+  z-index:5;
+}
+
+.menu-btn{
+  color:white;
+  text-decoration:none;
+  font-size:2rem;
+  opacity:0;
+  transform:translateY(10px);
+  transition:1s;
+}
+
+.overlay-text.show .menu-btn{
+  opacity:1;
+  transform:none;
+}
+
+.overlay-text.selecting .menu-btn{
+  opacity:0.2;
+}
+
+.overlay-text .selected{
+  opacity:1!important;
+  transform:scale(1.1);
+}
 </style>
 </head>
 
 <body>
 
-<audio id="bgm" src="./TopPage/bgm.mp3" loop playsinline></audio>
+<audio id="bgm" src="TopPage/bgm.mp3" loop playsinline></audio>
 
 <!-- イントロ -->
 <div class="intro" id="intro">
@@ -128,6 +161,13 @@ input {
 <div id="main">
   <canvas id="snow"></canvas>
 
+  <!-- メニュー -->
+  <div id="overlayText" class="overlay-text">
+    <a href="killclip.html" class="menu-btn">Kill Clip</a>
+    <a href="combatlog.html" class="menu-btn">Combat Log</a>
+  </div>
+
+  <!-- 音量UI -->
   <div class="audio-ui" id="ui">
     <button id="toggle">⏸</button>
     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
@@ -139,6 +179,7 @@ input {
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const ui = document.getElementById("ui");
+const overlay = document.getElementById("overlayText");
 
 const bgm = document.getElementById("bgm");
 const toggle = document.getElementById("toggle");
@@ -202,9 +243,8 @@ function startExperience() {
 
   intro.classList.add("open");
 
-  // 👇 ぼやけ終わりと完全同期
   setTimeout(() => {
-    // BGM開始（フェード）
+    // BGMフェード
     bgm.play().catch(()=>{});
     let v = 0;
     const fade = setInterval(()=>{
@@ -213,17 +253,21 @@ function startExperience() {
       if(v >= 0.5) clearInterval(fade);
     },100);
 
-    // 雪開始
+    // 雪
     resize();
     initSnow();
     animateSnow();
 
-    // UI表示
+    // UI
     ui.classList.add("show");
+
+    // メニュー表示
+    setTimeout(()=>{
+      overlay.classList.add("show");
+    },1500);
 
   }, 1000);
 
-  // 画面切り替え
   setTimeout(() => {
     intro.style.display = "none";
     main.classList.add("show");
@@ -244,6 +288,20 @@ toggle.onclick = () => {
 volume.oninput = () => {
   bgm.volume = volume.value;
 };
+
+// ===== メニュークリック =====
+document.querySelectorAll(".menu-btn").forEach(btn=>{
+  btn.addEventListener("click",e=>{
+    e.preventDefault();
+
+    overlay.classList.add("selecting");
+    btn.classList.add("selected");
+
+    setTimeout(()=>{
+      window.location.href = btn.getAttribute("href");
+    },800);
+  });
+});
 
 // ===== イベント =====
 window.addEventListener("click", startExperience, { once: true });
