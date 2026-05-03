@@ -1,236 +1,5 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome...</title>
-
-<style>
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  height: 100dvh;
-  background: #000;
-  overflow: hidden;
-  font-family: serif;
-  cursor: pointer;
-}
-
-/* ===== イントロ ===== */
-.intro {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: grid;
-  place-items: center;
-}
-
-.bg {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, #111, #000);
-  transition: 1.2s ease;
-}
-
-.glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent);
-  transition: 1s;
-}
-
-.content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
-h1 {
-  color: white;
-  font-size: clamp(3rem, 10vw, 7rem);
-  letter-spacing: 0.1em;
-  transition: 1s;
-}
-
-.intro.open .glow {
-  opacity: 0;
-}
-
-.intro.open h1 {
-  opacity: 0;
-  filter: blur(4px);
-  transform: scale(1.05);
-}
-
-/* ===== メイン ===== */
-#main {
-  opacity: 0;
-  transition: opacity 1.2s;
-}
-
-#main.show {
-  opacity: 1;
-}
-
-/* ===== 雪 ===== */
-#snow {
-  position: fixed;
-  inset: 0;
-}
-
-/* ===== タイトル（発光） ===== */
-.title{
-  position:fixed;
-  top:80px;
-  left:50%;
-  transform:translateX(-50%);
-  color:white;
-  font-size:clamp(2.5rem,6vw,5rem);
-  font-weight:800;
-  letter-spacing:0.1em;
-  opacity:0;
-  z-index:6;
-  transition:1s;
-
-  text-shadow:
-    0 0 10px rgba(255,255,255,0.4),
-    0 0 20px rgba(255,255,255,0.3),
-    0 0 40px rgba(255,255,255,0.2);
-}
-
-#main.show .title{
-  opacity:1;
-}
-
-/* ===== UI ===== */
-.audio-ui {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 20;
-  display: flex;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.4);
-  opacity: 0;
-  transition: 1s;
-}
-
-.audio-ui.show {
-  opacity: 1;
-}
-
-button {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-input {
-  width: 80px;
-}
-
-/* ===== メニュー ===== */
-.overlay-text{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:100px;
-  transform:translateY(80px);
-  z-index:5;
-}
-
-.menu-btn{
-  color:white;
-  text-decoration:none;
-  font-size:2.5rem;
-  font-weight:700;
-  letter-spacing:0.05em;
-  opacity:0;
-  transform:translateY(10px);
-  transition:1s;
-}
-
-/* 表示 */
-.overlay-text.show .menu-btn{
-  opacity:1;
-  transform:none;
-}
-
-/* 選択 */
-.overlay-text.selecting .menu-btn{
-  opacity:0.2;
-}
-
-.overlay-text .selected{
-  opacity:1!important;
-  transform:scale(1.1);
-}
-
-/* 🔥 ホバー発光 */
-.menu-btn:hover{
-  text-shadow:
-    0 0 15px #fff,
-    0 0 30px #fff,
-    0 0 60px #fff;
-  transform:scale(1.1);
-}
-
-/* スマホ */
-@media (max-width:600px){
-  .overlay-text{
-    flex-direction:column;
-    gap:30px;
-    transform:translateY(40px);
-  }
-
-  .title{
-    top:40px;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<audio id="bgm" src="TopPage/bgm.mp3" loop playsinline></audio>
-
-<!-- イントロ -->
-<div class="intro" id="intro">
-  <div class="bg"></div>
-  <div class="glow"></div>
-  <div class="content">
-    <h1>Welcome...</h1>
-  </div>
-</div>
-
-<!-- メイン -->
-<div id="main">
-  <canvas id="snow"></canvas>
-
-  <!-- タイトル -->
-  <h1 class="title">Project Aincrad</h1>
-
-  <!-- メニュー -->
-  <div id="overlayText" class="overlay-text">
-    <a href="KillClip/KillClip.html" class="menu-btn">Kill Clip</a>
-    <a href="CombatLog/CombatLog.html" class="menu-btn">Combat Log</a>
-  </div>
-
-  <!-- UI -->
-  <div class="audio-ui" id="ui">
-    <button id="toggle">⏸</button>
-    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
-  </div>
-</div>
-
 <script>
-// 要素
+// ===== 要素 =====
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const ui = document.getElementById("ui");
@@ -244,7 +13,7 @@ bgm.volume = 0;
 
 let started = false;
 
-// 雪
+// ===== 雪 =====
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
@@ -291,10 +60,39 @@ function animateSnow() {
   requestAnimationFrame(animateSnow);
 }
 
-// 開始
+// ===== 復元（ここが追加ポイント） =====
+window.addEventListener("DOMContentLoaded", () => {
+
+  if(sessionStorage.getItem("visited")){
+    // イントロ消す
+    intro.style.display = "none";
+    main.classList.add("show");
+
+    // 雪
+    resize();
+    initSnow();
+    animateSnow();
+
+    // UI
+    ui.classList.add("show");
+
+    // メニュー
+    setTimeout(()=>{
+      overlay.classList.add("show");
+    },500);
+
+    return;
+  }
+
+});
+
+// ===== 開始 =====
 function startExperience() {
   if (started) return;
   started = true;
+
+  // 👇 訪問フラグ保存（超重要）
+  sessionStorage.setItem("visited", "true");
 
   intro.classList.add("open");
 
@@ -325,7 +123,7 @@ function startExperience() {
   }, 1200);
 }
 
-// UI
+// ===== UI =====
 toggle.onclick = () => {
   if (bgm.paused) {
     bgm.play();
@@ -340,7 +138,7 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
-// メニュー
+// ===== メニュークリック =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
@@ -354,7 +152,7 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
   });
 });
 
-// イベント
+// ===== イベント =====
 window.addEventListener("click", startExperience, { once: true });
 window.addEventListener("touchstart", startExperience, { once: true });
 
@@ -363,6 +161,3 @@ window.onresize = () => {
   initSnow();
 };
 </script>
-
-</body>
-</html>
