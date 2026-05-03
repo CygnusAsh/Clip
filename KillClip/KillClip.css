@@ -6,14 +6,14 @@ body{
   overflow:hidden;
 }
 
-/* 雪 */
+/* ===== 雪 ===== */
 #snow{
   position:fixed;
   inset:0;
   z-index:0;
 }
 
-/* タイトル */
+/* ===== タイトル（戻る） ===== */
 .site-title{
   position:fixed;
   top:30px;
@@ -41,7 +41,7 @@ body{
   transform:translateX(-50%) scale(1.05);
 }
 
-/* コンテンツ */
+/* ===== コンテンツ ===== */
 .page-content{
   position:relative;
   z-index:5;
@@ -49,7 +49,7 @@ body{
   margin-top:140px;
 }
 
-/* 検索 */
+/* ===== 検索 ===== */
 .search-box{
   margin:20px 0;
 }
@@ -62,7 +62,7 @@ body{
   color:white;
 }
 
-/* カード */
+/* ===== カード ===== */
 .card-container{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
@@ -76,6 +76,7 @@ body{
   border-radius:10px;
   cursor:pointer;
   transition:0.3s;
+  position:relative;
 }
 
 .card:hover{
@@ -83,6 +84,7 @@ body{
   box-shadow:0 0 20px rgba(255,255,255,0.2);
 }
 
+/* ===== テキスト ===== */
 .card-id{
   font-size:0.9rem;
   word-break:break-all;
@@ -99,12 +101,40 @@ body{
   margin-bottom:5px;
 }
 
-.card video{
+/* ===== サムネ ===== */
+.thumb{
   width:100%;
   border-radius:5px;
+  cursor:pointer;
+  transition:0.3s;
 }
 
-/* プロフィールボタン */
+.thumb:hover{
+  transform:scale(1.03);
+}
+
+/* ▶ 再生アイコン */
+.thumb-wrapper{
+  position:relative;
+}
+
+.thumb-wrapper::after{
+  content:"▶";
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:2rem;
+  color:white;
+  opacity:0.8;
+  pointer-events:none;
+
+  text-shadow:
+    0 0 10px #fff,
+    0 0 20px #fff;
+}
+
+/* ===== プロフィールボタン ===== */
 .profile-btn{
   margin:5px 0;
   padding:5px 10px;
@@ -120,7 +150,7 @@ body{
   color:black;
 }
 
-/* モーダル */
+/* ===== モーダル ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -136,13 +166,13 @@ body{
   max-width:800px;
 }
 
-/* フェード */
+/* ===== フェード ===== */
 .fade-out{
   opacity:0;
   transition:1s;
 }
 
-/* スマホ */
+/* ===== スマホ ===== */
 @media (max-width:600px){
   .site-title{
     top:20px;
