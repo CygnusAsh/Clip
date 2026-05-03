@@ -6,60 +6,131 @@
 <title>Welcome...</title>
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  background:#000;
-  overflow:hidden;
-  font-family:serif;
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100dvh;
+  background: #000;
+  overflow: hidden;
+  font-family: serif;
+  cursor: pointer;
 }
 
 /* ===== イントロ ===== */
-.intro{
-  position:fixed;
-  inset:0;
-  display:grid;
-  place-items:center;
-  z-index:10;
-  color:white;
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
 }
 
-.intro.open{
-  opacity:0;
-  transition:1s;
+.bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #111, #000);
+  transition: 1.2s ease;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent);
+  transition: 1s;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+h1 {
+  color: white;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.1em;
+  transition: 1s;
+}
+
+.intro.open .glow {
+  opacity: 0;
+}
+
+.intro.open h1 {
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.05);
 }
 
 /* ===== メイン ===== */
-#main{
-  opacity:0;
-  transition:1s;
+#main {
+  opacity: 0;
+  transition: opacity 1.2s;
 }
 
-#main.show{
-  opacity:1;
+#main.show {
+  opacity: 1;
 }
 
 /* ===== 雪 ===== */
-#snow{
-  position:fixed;
-  inset:0;
+#snow {
+  position: fixed;
+  inset: 0;
 }
 
-/* ===== タイトル ===== */
+/* ===== タイトル（発光） ===== */
 .title{
   position:fixed;
   top:80px;
   left:50%;
   transform:translateX(-50%);
   color:white;
-  font-size:3rem;
+  font-size:clamp(2.5rem,6vw,5rem);
   font-weight:800;
+  letter-spacing:0.1em;
   opacity:0;
+  z-index:6;
   transition:1s;
+
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.4),
+    0 0 20px rgba(255,255,255,0.3),
+    0 0 40px rgba(255,255,255,0.2);
 }
 
 #main.show .title{
   opacity:1;
+}
+
+/* ===== UI ===== */
+.audio-ui {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: 1s;
+}
+
+.audio-ui.show {
+  opacity: 1;
+}
+
+button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+input {
+  width: 80px;
 }
 
 /* ===== メニュー ===== */
@@ -71,157 +142,226 @@ html,body{
   align-items:center;
   gap:100px;
   transform:translateY(80px);
+  z-index:5;
 }
 
 .menu-btn{
   color:white;
   text-decoration:none;
-  font-size:2rem;
+  font-size:2.5rem;
   font-weight:700;
+  letter-spacing:0.05em;
   opacity:0;
+  transform:translateY(10px);
   transition:1s;
 }
 
+/* 表示 */
 .overlay-text.show .menu-btn{
   opacity:1;
+  transform:none;
 }
 
-/* ===== フェード ===== */
-.fade-out{
-  opacity:0;
-  transition:1s;
+/* 選択 */
+.overlay-text.selecting .menu-btn{
+  opacity:0.2;
+}
+
+.overlay-text .selected{
+  opacity:1!important;
+  transform:scale(1.1);
+}
+
+/* 🔥 ホバー発光 */
+.menu-btn:hover{
+  text-shadow:
+    0 0 15px #fff,
+    0 0 30px #fff,
+    0 0 60px #fff;
+  transform:scale(1.1);
+}
+
+/* スマホ */
+@media (max-width:600px){
+  .overlay-text{
+    flex-direction:column;
+    gap:30px;
+    transform:translateY(40px);
+  }
+
+  .title{
+    top:40px;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<audio id="bgm" src="TopPage/bgm.mp3" loop playsinline></audio>
+
+<!-- イントロ -->
 <div class="intro" id="intro">
-  <h1>Welcome...</h1>
+  <div class="bg"></div>
+  <div class="glow"></div>
+  <div class="content">
+    <h1>Welcome...</h1>
+  </div>
 </div>
 
+<!-- メイン -->
 <div id="main">
   <canvas id="snow"></canvas>
 
+  <!-- タイトル -->
   <h1 class="title">Project Aincrad</h1>
 
+  <!-- メニュー -->
   <div id="overlayText" class="overlay-text">
     <a href="KillClip/KillClip.html" class="menu-btn">Kill Clip</a>
     <a href="CombatLog/CombatLog.html" class="menu-btn">Combat Log</a>
   </div>
+
+  <!-- UI -->
+  <div class="audio-ui" id="ui">
+    <button id="toggle">⏸</button>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+  </div>
 </div>
 
 <script>
-// ===== 要素 =====
+// 要素
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
+const ui = document.getElementById("ui");
 const overlay = document.getElementById("overlayText");
 
-// ===== 雪 =====
+const bgm = document.getElementById("bgm");
+const toggle = document.getElementById("toggle");
+const volume = document.getElementById("volume");
+
+bgm.volume = 0;
+
+let started = false;
+
+// 雪
 const canvas = document.getElementById("snow");
+const ctx = canvas.getContext("2d");
 
-let ctx;
 let flakes = [];
+const count = innerWidth < 600 ? 120 : 200;
 
-if(canvas){
-  ctx = canvas.getContext("2d");
+function resize() {
+  const dpr = devicePixelRatio || 1;
+  canvas.width = innerWidth * dpr;
+  canvas.height = innerHeight * dpr;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr,dpr);
 }
 
-function resize(){
-  if(!canvas) return;
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-}
-
-function createFlake(){
+function createFlake() {
   return {
-    x:Math.random()*innerWidth,
-    y:Math.random()*innerHeight,
-    r:Math.random()*2,
-    vy:Math.random()+0.3
+    x: Math.random()*innerWidth,
+    y: Math.random()*innerHeight,
+    r: Math.random()*2,
+    vy: Math.random()+0.3
   };
 }
 
-function init(){
-  flakes=[];
-  for(let i=0;i<150;i++) flakes.push(createFlake());
+function initSnow() {
+  flakes = [];
+  for(let i=0;i<count;i++) flakes.push(createFlake());
 }
 
-function animate(){
-  if(!ctx) return;
-
+function animateSnow() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   flakes.forEach(f=>{
-    f.y+=f.vy;
-    if(f.y>innerHeight)f.y=0;
+    f.y += f.vy;
+    if(f.y > innerHeight) f.y = 0;
 
     ctx.beginPath();
     ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-    ctx.fillStyle="white";
+    ctx.fillStyle = "white";
     ctx.fill();
   });
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animateSnow);
 }
 
-// ===== 戻ったときスキップ =====
-window.addEventListener("DOMContentLoaded", () => {
-
-  if(sessionStorage.getItem("visited")){
-    intro.style.display = "none";
-    main.classList.add("show");
-
-    resize();
-    init();
-    animate();
-
-    if(overlay){
-      setTimeout(()=>overlay.classList.add("show"),500);
-    }
-
-    return;
-  }
-});
-
-// ===== 開始 =====
-function startExperience(){
-  sessionStorage.setItem("visited","true");
+// 開始
+function startExperience() {
+  if (started) return;
+  started = true;
 
   intro.classList.add("open");
 
-  setTimeout(()=>{
-    intro.style.display="none";
-    main.classList.add("show");
+  setTimeout(() => {
+    bgm.play().catch(()=>{});
+    let v = 0;
+    const fade = setInterval(()=>{
+      v += 0.02;
+      bgm.volume = v;
+      if(v >= 0.5) clearInterval(fade);
+    },100);
 
     resize();
-    init();
-    animate();
+    initSnow();
+    animateSnow();
 
-    if(overlay){
-      setTimeout(()=>overlay.classList.add("show"),1000);
-    }
+    ui.classList.add("show");
 
-  },1000);
+    setTimeout(()=>{
+      overlay.classList.add("show");
+    },1500);
+
+  }, 1000);
+
+  setTimeout(() => {
+    intro.style.display = "none";
+    main.classList.add("show");
+  }, 1200);
 }
 
-window.addEventListener("click", startExperience, {once:true});
+// UI
+toggle.onclick = () => {
+  if (bgm.paused) {
+    bgm.play();
+    toggle.textContent = "⏸";
+  } else {
+    bgm.pause();
+    toggle.textContent = "▶";
+  }
+};
 
-// ===== メニュークリック =====
+volume.oninput = () => {
+  bgm.volume = volume.value;
+};
+
+// メニュー
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
 
-    document.body.classList.add("fade-out");
+    overlay.classList.add("selecting");
+    btn.classList.add("selected");
 
     setTimeout(()=>{
-      window.location.href = btn.href;
+      window.location.href = btn.getAttribute("href");
     },800);
   });
 });
 
-// ===== リサイズ =====
-window.onresize = resize;
+// イベント
+window.addEventListener("click", startExperience, { once: true });
+window.addEventListener("touchstart", startExperience, { once: true });
+
+window.onresize = () => {
+  resize();
+  initSnow();
+};
 </script>
 
 </body>
