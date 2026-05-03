@@ -40,21 +40,31 @@ function renderClips(list){
       </div>
     `;
 
-    // 🎥 動画クリック
+    // 🎥 動画クリック（確実版）
     const img = card.querySelector(".thumb");
+
     if(img){
-      img.addEventListener("click", ()=>{
-        if(c.video) openModal(c.video);
+      img.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        console.log("クリックOK");
+
+        if(c.video){
+          openModal(c.video);
+        }
       });
     }
 
     // 👤 プロフィール
-    card.querySelector(".profile-btn").onclick = (e)=>{
-      e.stopPropagation();
-      if(c.profile){
-        window.open(c.profile, "_blank");
-      }
-    };
+    const btn = card.querySelector(".profile-btn");
+
+    if(btn){
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        if(c.profile){
+          window.open(c.profile, "_blank");
+        }
+      });
+    }
 
     container.appendChild(card);
   });
@@ -65,10 +75,9 @@ const modal = document.getElementById("modal");
 const modalVideo = document.getElementById("modalVideo");
 
 function openModal(src){
-  console.log("再生:", src); // ★デバッグ用
+  console.log("再生:", src);
 
   modal.style.display = "flex";
-
   modalVideo.src = src;
   modalVideo.currentTime = 0;
 
@@ -105,3 +114,58 @@ document.getElementById("searchInput").addEventListener("input", e=>{
 
   renderClips(sortByDate(filtered));
 });
+
+// ===== 雪 =====
+const canvas = document.getElementById("snow");
+
+if(canvas){
+  const ctx = canvas.getContext("2d");
+
+  let flakes = [];
+
+  function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+  }
+
+  function createFlake(){
+    return {
+      x:Math.random()*innerWidth,
+      y:Math.random()*innerHeight,
+      r:Math.random()*2,
+      vy:Math.random()+0.3
+    };
+  }
+
+  function init(){
+    flakes=[];
+    for(let i=0;i<150;i++) flakes.push(createFlake());
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    flakes.forEach(f=>{
+      f.y+=f.vy;
+      if(f.y>innerHeight) f.y=0;
+
+      ctx.beginPath();
+      ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+      ctx.fillStyle="white";
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener("load", ()=>{
+    resize();
+    init();
+    animate();
+  });
+
+  window.addEventListener("resize", ()=>{
+    resize();
+    init();
+  });
+}
