@@ -1,6 +1,6 @@
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
-
+ 
 if(canvas){
   const ctx = canvas.getContext("2d");
 
