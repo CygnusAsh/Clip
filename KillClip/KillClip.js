@@ -6,6 +6,9 @@ fetch("KillClip.json")
   .then(data => {
     clips = data;
     renderClips(sortByDate([...clips]));
+  })
+  .catch(err => {
+    console.error("JSON読み込みエラー:", err);
   });
 
 // ===== 日付ソート =====
@@ -32,7 +35,9 @@ function renderClips(list){
 
       <button class="profile-btn">Profile</button>
 
-      <img src="${c.thumbnail}" class="thumb">
+      <div class="thumb-wrapper">
+        <img src="${c.thumbnail}" class="thumb">
+      </div>
     `;
 
     // 🎥 サムネクリック → 動画再生
@@ -40,10 +45,12 @@ function renderClips(list){
       openModal(c.video);
     };
 
-    // 👤 プロフィール
+    // 👤 プロフィールボタン
     card.querySelector(".profile-btn").onclick = (e)=>{
       e.stopPropagation();
-      window.open(c.profile, "_blank");
+      if(c.profile){
+        window.open(c.profile, "_blank");
+      }
     };
 
     container.appendChild(card);
@@ -74,6 +81,7 @@ const modalVideo = document.getElementById("modalVideo");
 function openModal(src){
   modal.style.display = "flex";
   modalVideo.src = src;
+  modalVideo.currentTime = 0;
   modalVideo.play();
 }
 
@@ -82,7 +90,7 @@ modal.onclick = ()=>{
   modalVideo.pause();
 };
 
-// ===== 雪（そのまま） =====
+// ===== 雪エフェクト =====
 const canvas = document.getElementById("snow");
 
 if(canvas){
@@ -114,7 +122,7 @@ if(canvas){
 
     flakes.forEach(f=>{
       f.y+=f.vy;
-      if(f.y>innerHeight)f.y=0;
+      if(f.y>innerHeight) f.y=0;
 
       ctx.beginPath();
       ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
@@ -125,19 +133,23 @@ if(canvas){
     requestAnimationFrame(animate);
   }
 
-  window.onload = ()=>{
+  window.addEventListener("load", ()=>{
     resize();
     init();
     animate();
-  };
+  });
 
-  window.onresize = resize;
+  window.addEventListener("resize", ()=>{
+    resize();
+    init();
+  });
 }
 
 // ===== フェード遷移 =====
 document.querySelectorAll("a").forEach(link=>{
   link.addEventListener("click",e=>{
     const href = link.getAttribute("href");
+
     if(!href || href.startsWith("#")) return;
 
     e.preventDefault();
