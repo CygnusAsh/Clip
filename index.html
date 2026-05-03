@@ -244,7 +244,14 @@ bgm.volume = 0;
 
 let started = false;
 
-// 雪
+// ===== 再生位置保存 =====
+setInterval(()=>{
+  if(!bgm.paused){
+    sessionStorage.setItem("bgmTime", bgm.currentTime);
+  }
+},500);
+
+// ===== 雪 =====
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
@@ -291,15 +298,36 @@ function animateSnow() {
   requestAnimationFrame(animateSnow);
 }
 
-// 開始
+// ===== 戻ったときスキップ =====
+window.addEventListener("DOMContentLoaded", () => {
+  if(sessionStorage.getItem("visited")){
+    intro.style.display = "none";
+    main.classList.add("show");
+
+    resize();
+    initSnow();
+    animateSnow();
+
+    ui.classList.add("show");
+
+    setTimeout(()=>{
+      overlay.classList.add("show");
+    },500);
+  }
+});
+
+// ===== 開始 =====
 function startExperience() {
   if (started) return;
   started = true;
+
+  sessionStorage.setItem("visited","true");
 
   intro.classList.add("open");
 
   setTimeout(() => {
     bgm.play().catch(()=>{});
+
     let v = 0;
     const fade = setInterval(()=>{
       v += 0.02;
@@ -347,6 +375,8 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
+
+    document.body.classList.add("fade-out");
 
     setTimeout(()=>{
       window.location.href = btn.getAttribute("href");
