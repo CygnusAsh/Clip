@@ -178,6 +178,11 @@ input {
   transform:scale(1.1);
 }
 
+.fade-out{
+  opacity:0;
+  transition:1s;
+}
+
 @media (max-width:600px){
   .overlay-text{
     flex-direction:column;
@@ -221,7 +226,7 @@ input {
 </div>
 
 <script>
-// 要素
+// ===== 要素 =====
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const ui = document.getElementById("ui");
@@ -234,6 +239,7 @@ const volume = document.getElementById("volume");
 bgm.volume = 0;
 
 let started = false;
+let fading = false;
 
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
@@ -337,7 +343,7 @@ function startExperience() {
   }, 1200);
 }
 
-// UI
+// ===== UI =====
 toggle.onclick = () => {
   if (bgm.paused) {
     bgm.play();
@@ -352,27 +358,37 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
-// ===== メニュー（修正済み） =====
+// ===== メニュー（BGMフェード付き） =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
 
-    // ★ BGM停止
-    bgm.pause();
-    bgm.currentTime = 0;
+    if(fading) return;
+    fading = true;
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
 
-    document.body.classList.add("fade-out");
+    // ★ BGMフェードアウト
+    let fade = setInterval(()=>{
+      bgm.volume -= 0.05;
 
-    setTimeout(()=>{
-      window.location.href = btn.getAttribute("href");
-    },800);
+      if(bgm.volume <= 0){
+        bgm.volume = 0;
+        bgm.pause();
+        clearInterval(fade);
+
+        document.body.classList.add("fade-out");
+
+        setTimeout(()=>{
+          window.location.href = btn.getAttribute("href");
+        },600);
+      }
+    },50);
   });
 });
 
-// イベント
+// ===== イベント =====
 window.addEventListener("click", startExperience, { once: true });
 window.addEventListener("touchstart", startExperience, { once: true });
 
