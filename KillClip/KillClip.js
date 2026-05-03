@@ -1,3 +1,87 @@
+// ===== JSON読み込み =====
+let clips = [];
+
+fetch("KillClip.json")
+  .then(res => res.json())
+  .then(data => {
+    clips = data;
+    renderClips(sortByDate([...clips]));
+  });
+
+// ===== 日付ソート =====
+function sortByDate(list){
+  return list.sort((a,b)=>{
+    return new Date(b.date) - new Date(a.date);
+  });
+}
+
+// ===== カード生成 =====
+const container = document.getElementById("cardContainer");
+
+function renderClips(list){
+  container.innerHTML = "";
+
+  list.forEach(c=>{
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-id">${c.id}</div>
+      <div class="card-player">${c.player}</div>
+      <div class="card-date">${c.date}</div>
+
+      <button class="profile-btn">Profile</button>
+
+      <video src="${c.video}" muted></video>
+    `;
+
+    // 動画クリック
+    card.querySelector("video").onclick = ()=>{
+      openModal(c.video);
+    };
+
+    // プロフィール
+    card.querySelector(".profile-btn").onclick = (e)=>{
+      e.stopPropagation();
+      window.open(c.profile, "_blank");
+    };
+
+    container.appendChild(card);
+  });
+}
+
+// ===== 検索 =====
+const input = document.getElementById("searchInput");
+
+input.addEventListener("input", ()=>{
+  const keyword = input.value.toLowerCase();
+
+  const filtered = clips.filter(c=>{
+    return (
+      c.id.toLowerCase().includes(keyword) ||
+      c.player.toLowerCase().includes(keyword) ||
+      c.date.toLowerCase().includes(keyword)
+    );
+  });
+
+  renderClips(sortByDate(filtered));
+});
+
+// ===== モーダル =====
+const modal = document.getElementById("modal");
+const modalVideo = document.getElementById("modalVideo");
+
+function openModal(src){
+  modal.style.display = "flex";
+  modalVideo.src = src;
+  modalVideo.play();
+}
+
+modal.onclick = ()=>{
+  modal.style.display = "none";
+  modalVideo.pause();
+};
+
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
 
