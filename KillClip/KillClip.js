@@ -1,7 +1,7 @@
 // ===== JSON読み込み =====
 let clips = [];
 
-fetch("/Clip/KillClip/KillClip.json")
+fetch("./KillClip.json") // ← ★ここ重要
   .then(res => res.json())
   .then(data => {
     clips = data;
@@ -30,8 +30,7 @@ function renderClips(list){
     const card = document.createElement("div");
     card.className = "card";
 
-    // サムネ保険
-    const thumb = c.thumbnail ? c.thumbnail : "/Clip/KCS/default.png";
+    const thumb = c.thumbnail ? c.thumbnail : "../KCS/default.png";
 
     card.innerHTML = `
       <div class="card-id">${c.id || ""}</div>
@@ -45,24 +44,18 @@ function renderClips(list){
       </div>
     `;
 
-    // 🎥 動画再生
-    const img = card.querySelector(".thumb");
-    if(img){
-      img.onclick = ()=>{
-        if(c.video) openModal(c.video);
-      };
-    }
+    // 🎥 動画
+    card.querySelector(".thumb").onclick = ()=>{
+      if(c.video) openModal(c.video);
+    };
 
     // 👤 プロフィール
-    const btn = card.querySelector(".profile-btn");
-    if(btn){
-      btn.onclick = (e)=>{
-        e.stopPropagation();
-        if(c.profile){
-          window.open(c.profile, "_blank");
-        }
-      };
-    }
+    card.querySelector(".profile-btn").onclick = (e)=>{
+      e.stopPropagation();
+      if(c.profile){
+        window.open(c.profile, "_blank");
+      }
+    };
 
     container.appendChild(card);
   });
@@ -84,30 +77,35 @@ function openModal(src){
 if(modal){
   modal.onclick = ()=>{
     modal.style.display = "none";
-    if(modalVideo){
-      modalVideo.pause();
-      modalVideo.src = "";
-    }
+    modalVideo.pause();
+    modalVideo.src = "";
   };
 }
 
-// ===== 🔍 検索（完全修正版） =====
+// ===== 🔍 検索 =====
 window.addEventListener("DOMContentLoaded", ()=>{
 
   const input = document.getElementById("searchInput");
-
   if(!input) return;
 
   input.addEventListener("input", ()=>{
     if(!clips.length) return;
 
-    const keyword = input.value.toLowerCase();
+    const value = input.value;
+
+    // 空なら全部表示
+    if(!value){
+      renderClips(sortByDate([...clips]));
+      return;
+    }
+
+    const keyword = value.toLowerCase();
 
     const filtered = clips.filter(c=>{
       return (
         (c.id && c.id.toLowerCase().includes(keyword)) ||
         (c.player && c.player.toLowerCase().includes(keyword)) ||
-        (c.date && c.date.toLowerCase().includes(keyword))
+        (c.date && c.date.includes(value))
       );
     });
 
@@ -116,7 +114,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
 });
 
-// ===== 雪エフェクト =====
+// ===== 雪 =====
 const canvas = document.getElementById("snow");
 
 if(canvas){
