@@ -1,163 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome...</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:#000;
+  overflow:hidden;
+  font-family:serif;
+}
+
+/* ===== イントロ ===== */
+.intro{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  z-index:10;
+  color:white;
+}
+
+.intro.open{
+  opacity:0;
+  transition:1s;
+}
+
+/* ===== メイン ===== */
+#main{
+  opacity:0;
+  transition:1s;
+}
+
+#main.show{
+  opacity:1;
+}
+
+/* ===== 雪 ===== */
+#snow{
+  position:fixed;
+  inset:0;
+}
+
+/* ===== タイトル ===== */
+.title{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:3rem;
+  font-weight:800;
+  opacity:0;
+  transition:1s;
+}
+
+#main.show .title{
+  opacity:1;
+}
+
+/* ===== メニュー ===== */
+.overlay-text{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:100px;
+  transform:translateY(80px);
+}
+
+.menu-btn{
+  color:white;
+  text-decoration:none;
+  font-size:2rem;
+  font-weight:700;
+  opacity:0;
+  transition:1s;
+}
+
+.overlay-text.show .menu-btn{
+  opacity:1;
+}
+
+/* ===== フェード ===== */
+.fade-out{
+  opacity:0;
+  transition:1s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="intro" id="intro">
+  <h1>Welcome...</h1>
+</div>
+
+<div id="main">
+  <canvas id="snow"></canvas>
+
+  <h1 class="title">Project Aincrad</h1>
+
+  <div id="overlayText" class="overlay-text">
+    <a href="KillClip/KillClip.html" class="menu-btn">Kill Clip</a>
+    <a href="CombatLog/CombatLog.html" class="menu-btn">Combat Log</a>
+  </div>
+</div>
+
 <script>
 // ===== 要素 =====
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
-const ui = document.getElementById("ui");
 const overlay = document.getElementById("overlayText");
-
-const bgm = document.getElementById("bgm");
-const toggle = document.getElementById("toggle");
-const volume = document.getElementById("volume");
-
-bgm.volume = 0;
-
-let started = false;
 
 // ===== 雪 =====
 const canvas = document.getElementById("snow");
-const ctx = canvas.getContext("2d");
 
+let ctx;
 let flakes = [];
-const count = innerWidth < 600 ? 120 : 200;
 
-function resize() {
-  const dpr = devicePixelRatio || 1;
-  canvas.width = innerWidth * dpr;
-  canvas.height = innerHeight * dpr;
-  canvas.style.width = innerWidth + "px";
-  canvas.style.height = innerHeight + "px";
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(dpr,dpr);
+if(canvas){
+  ctx = canvas.getContext("2d");
 }
 
-function createFlake() {
+function resize(){
+  if(!canvas) return;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+}
+
+function createFlake(){
   return {
-    x: Math.random()*innerWidth,
-    y: Math.random()*innerHeight,
-    r: Math.random()*2,
-    vy: Math.random()+0.3
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*2,
+    vy:Math.random()+0.3
   };
 }
 
-function initSnow() {
-  flakes = [];
-  for(let i=0;i<count;i++) flakes.push(createFlake());
+function init(){
+  flakes=[];
+  for(let i=0;i<150;i++) flakes.push(createFlake());
 }
 
-function animateSnow() {
+function animate(){
+  if(!ctx) return;
+
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   flakes.forEach(f=>{
-    f.y += f.vy;
-    if(f.y > innerHeight) f.y = 0;
+    f.y+=f.vy;
+    if(f.y>innerHeight)f.y=0;
 
     ctx.beginPath();
     ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-    ctx.fillStyle = "white";
+    ctx.fillStyle="white";
     ctx.fill();
   });
 
-  requestAnimationFrame(animateSnow);
+  requestAnimationFrame(animate);
 }
 
-// ===== 復元（ここが追加ポイント） =====
+// ===== 戻ったときスキップ =====
 window.addEventListener("DOMContentLoaded", () => {
 
   if(sessionStorage.getItem("visited")){
-    // イントロ消す
     intro.style.display = "none";
     main.classList.add("show");
 
-    // 雪
     resize();
-    initSnow();
-    animateSnow();
+    init();
+    animate();
 
-    // UI
-    ui.classList.add("show");
-
-    // メニュー
-    setTimeout(()=>{
-      overlay.classList.add("show");
-    },500);
+    if(overlay){
+      setTimeout(()=>overlay.classList.add("show"),500);
+    }
 
     return;
   }
-
 });
 
 // ===== 開始 =====
-function startExperience() {
-  if (started) return;
-  started = true;
-
-  // 👇 訪問フラグ保存（超重要）
-  sessionStorage.setItem("visited", "true");
+function startExperience(){
+  sessionStorage.setItem("visited","true");
 
   intro.classList.add("open");
 
-  setTimeout(() => {
-    bgm.play().catch(()=>{});
-    let v = 0;
-    const fade = setInterval(()=>{
-      v += 0.02;
-      bgm.volume = v;
-      if(v >= 0.5) clearInterval(fade);
-    },100);
+  setTimeout(()=>{
+    intro.style.display="none";
+    main.classList.add("show");
 
     resize();
-    initSnow();
-    animateSnow();
+    init();
+    animate();
 
-    ui.classList.add("show");
+    if(overlay){
+      setTimeout(()=>overlay.classList.add("show"),1000);
+    }
 
-    setTimeout(()=>{
-      overlay.classList.add("show");
-    },1500);
-
-  }, 1000);
-
-  setTimeout(() => {
-    intro.style.display = "none";
-    main.classList.add("show");
-  }, 1200);
+  },1000);
 }
 
-// ===== UI =====
-toggle.onclick = () => {
-  if (bgm.paused) {
-    bgm.play();
-    toggle.textContent = "⏸";
-  } else {
-    bgm.pause();
-    toggle.textContent = "▶";
-  }
-};
-
-volume.oninput = () => {
-  bgm.volume = volume.value;
-};
+window.addEventListener("click", startExperience, {once:true});
 
 // ===== メニュークリック =====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
 
-    overlay.classList.add("selecting");
-    btn.classList.add("selected");
+    document.body.classList.add("fade-out");
 
     setTimeout(()=>{
-      window.location.href = btn.getAttribute("href");
+      window.location.href = btn.href;
     },800);
   });
 });
 
-// ===== イベント =====
-window.addEventListener("click", startExperience, { once: true });
-window.addEventListener("touchstart", startExperience, { once: true });
-
-window.onresize = () => {
-  resize();
-  initSnow();
-};
+// ===== リサイズ =====
+window.onresize = resize;
 </script>
+
+</body>
+</html>
