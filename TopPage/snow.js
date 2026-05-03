@@ -4,7 +4,6 @@ window.addEventListener("DOMContentLoaded", () => {
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const overlay = document.getElementById("overlayText");
-
 const bgm = document.getElementById("bgm");
 
 // ===== Canvas =====
@@ -103,13 +102,18 @@ window.addEventListener("click",()=>{
 
 },{once:true});
 
-// ===== 選択 =====
+// ===== メニュークリック（遷移付き）=====
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
 
     overlay.classList.add("selecting");
     btn.classList.add("selected");
+
+    // 演出後にページ移動
+    setTimeout(()=>{
+      window.location.href = btn.getAttribute("href");
+    },800);
   });
 });
 
