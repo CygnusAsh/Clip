@@ -79,6 +79,25 @@ h1 {
   inset: 0;
 }
 
+/* ===== タイトル ===== */
+.title{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:clamp(2.5rem,6vw,5rem);
+  font-weight:800;
+  letter-spacing:0.1em;
+  opacity:0;
+  z-index:6;
+  transition:1s;
+}
+
+#main.show .title{
+  opacity:1;
+}
+
 /* ===== UI ===== */
 .audio-ui {
   position: fixed;
@@ -109,15 +128,15 @@ input {
   width: 80px;
 }
 
-/* ===== メニュー（完成版） ===== */
+/* ===== メニュー ===== */
 .overlay-text{
   position:fixed;
   inset:0;
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:100px;                 /* ← 間隔広げた */
-  transform:translateY(80px);/* ← 少し下 */
+  gap:100px;
+  transform:translateY(80px);
   z-index:5;
 }
 
@@ -125,7 +144,7 @@ input {
   color:white;
   text-decoration:none;
   font-size:2.5rem;
-  font-weight:700;           /* ← 太字 */
+  font-weight:700;
   letter-spacing:0.05em;
   opacity:0;
   transform:translateY(10px);
@@ -146,12 +165,16 @@ input {
   transform:scale(1.1);
 }
 
-/* スマホ対応 */
+/* スマホ */
 @media (max-width:600px){
   .overlay-text{
     flex-direction:column;
     gap:30px;
     transform:translateY(40px);
+  }
+
+  .title{
+    top:40px;
   }
 }
 </style>
@@ -174,13 +197,16 @@ input {
 <div id="main">
   <canvas id="snow"></canvas>
 
+  <!-- タイトル -->
+  <h1 class="title">Project Aincrad</h1>
+
   <!-- メニュー -->
   <div id="overlayText" class="overlay-text">
     <a href="killclip.html" class="menu-btn">Kill Clip</a>
     <a href="combatlog.html" class="menu-btn">Combat Log</a>
   </div>
 
-  <!-- 音量UI -->
+  <!-- UI -->
   <div class="audio-ui" id="ui">
     <button id="toggle">⏸</button>
     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
@@ -188,7 +214,7 @@ input {
 </div>
 
 <script>
-// ===== 要素 =====
+// 要素
 const intro = document.getElementById("intro");
 const main = document.getElementById("main");
 const ui = document.getElementById("ui");
@@ -202,7 +228,7 @@ bgm.volume = 0;
 
 let started = false;
 
-// ===== 雪 =====
+// 雪
 const canvas = document.getElementById("snow");
 const ctx = canvas.getContext("2d");
 
@@ -249,7 +275,7 @@ function animateSnow() {
   requestAnimationFrame(animateSnow);
 }
 
-// ===== 再生 =====
+// 開始
 function startExperience() {
   if (started) return;
   started = true;
@@ -283,7 +309,7 @@ function startExperience() {
   }, 1200);
 }
 
-// UI操作
+// UI
 toggle.onclick = () => {
   if (bgm.paused) {
     bgm.play();
@@ -298,7 +324,7 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
-// メニュークリック
+// メニュー
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
