@@ -109,23 +109,24 @@ input {
   width: 80px;
 }
 
-/* ===== メニュー（ここが変更点） ===== */
+/* ===== メニュー（完成版） ===== */
 .overlay-text{
   position:fixed;
   inset:0;
-  display:flex;              /* ← 横並び */
+  display:flex;
   justify-content:center;
   align-items:center;
-  gap:60px;                 /* 間隔広め */
+  gap:100px;                 /* ← 間隔広げた */
+  transform:translateY(80px);/* ← 少し下 */
   z-index:5;
 }
 
 .menu-btn{
   color:white;
   text-decoration:none;
-  font-size:2.5rem;         /* 少し大きく */
-  font-weight:700;          /* ← 太字 */
-  letter-spacing:0.05em;    /* 少し広げる */
+  font-size:2.5rem;
+  font-weight:700;           /* ← 太字 */
+  letter-spacing:0.05em;
   opacity:0;
   transform:translateY(10px);
   transition:1s;
@@ -145,11 +146,12 @@ input {
   transform:scale(1.1);
 }
 
-/* スマホは縦 */
+/* スマホ対応 */
 @media (max-width:600px){
   .overlay-text{
     flex-direction:column;
-    gap:25px;
+    gap:30px;
+    transform:translateY(40px);
   }
 }
 </style>
@@ -159,6 +161,7 @@ input {
 
 <audio id="bgm" src="TopPage/bgm.mp3" loop playsinline></audio>
 
+<!-- イントロ -->
 <div class="intro" id="intro">
   <div class="bg"></div>
   <div class="glow"></div>
@@ -167,14 +170,17 @@ input {
   </div>
 </div>
 
+<!-- メイン -->
 <div id="main">
   <canvas id="snow"></canvas>
 
+  <!-- メニュー -->
   <div id="overlayText" class="overlay-text">
     <a href="killclip.html" class="menu-btn">Kill Clip</a>
     <a href="combatlog.html" class="menu-btn">Combat Log</a>
   </div>
 
+  <!-- 音量UI -->
   <div class="audio-ui" id="ui">
     <button id="toggle">⏸</button>
     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
@@ -277,6 +283,7 @@ function startExperience() {
   }, 1200);
 }
 
+// UI操作
 toggle.onclick = () => {
   if (bgm.paused) {
     bgm.play();
@@ -291,6 +298,7 @@ volume.oninput = () => {
   bgm.volume = volume.value;
 };
 
+// メニュークリック
 document.querySelectorAll(".menu-btn").forEach(btn=>{
   btn.addEventListener("click",e=>{
     e.preventDefault();
@@ -304,6 +312,7 @@ document.querySelectorAll(".menu-btn").forEach(btn=>{
   });
 });
 
+// イベント
 window.addEventListener("click", startExperience, { once: true });
 window.addEventListener("touchstart", startExperience, { once: true });
 
