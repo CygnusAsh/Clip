@@ -1,67 +1,106 @@
-// ===== 雪 =====
-const canvas = document.getElementById("snow");
 
-if(canvas){
-  const ctx = canvas.getContext("2d");
+let clips = [];
 
-  let flakes = [];
+fetch("./CombatLog.json")
+  .then(res => res.json())
+  .then(data => {
+    clips = data;
+    renderClips(sortByDate([...clips]));
+  });
 
-  function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-  }
 
-  function createFlake(){
-    return {
-      x:Math.random()*innerWidth,
-      y:Math.random()*innerHeight,
-      r:Math.random()*2,
-      vy:Math.random()+0.3
-    };
-  }
-
-  function init(){
-    flakes=[];
-    for(let i=0;i<150;i++) flakes.push(createFlake());
-  }
-
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    flakes.forEach(f=>{
-      f.y+=f.vy;
-      if(f.y>innerHeight)f.y=0;
-
-      ctx.beginPath();
-      ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-      ctx.fillStyle="white";
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
-  }
-
-  window.onload = ()=>{
-    resize();
-    init();
-    animate();
-  };
-
-  window.onresize = resize;
+function sortByDate(list){
+  return list.sort((a,b)=> new Date(b.date) - new Date(a.date));
 }
 
-// ===== フェード遷移 =====
-document.querySelectorAll("a").forEach(link=>{
-  link.addEventListener("click",e=>{
-    const href = link.getAttribute("href");
-    if(!href || href.startsWith("#")) return;
+const container = document.getElementById("cardContainer");
 
-    e.preventDefault();
+function renderClips(list){
+  container.innerHTML = "";
 
-    document.body.classList.add("fade-out");
+  list.forEach(c=>{
+    const card = document.createElement("div");
+    card.className = "card";
 
-    setTimeout(()=>{
-      window.location.href = href;
-    },800);
+    card.innerHTML = `
+      <div>${c.id}</div>
+      <div>${c.player}</div>
+      <div>${c.date}</div>
+
+      <button class="profile-btn">Profile</button>
+
+      <div class="thumb-wrapper">
+        <img src="${c.thumbnail}" class="thumb">
+      </div>
+    `;
+
+
+    const img = card.querySelector(".thumb");
+
+    img.addEventListener("click", (e)=>{
+      e.stopPropagation();
+
+      console.log("OK");
+
+      openModal(c.video);
+    });
+
+
+    card.querySelector(".profile-btn").addEventListener("click",(e)=>{
+      e.stopPropagation();
+      window.open(c.profile, "_blank");
+    });
+
+    container.appendChild(card);
   });
+}
+
+
+const modal = document.getElementById("modal");
+const modalVideo = document.getElementById("modalVideo");
+
+function openModal(src){
+  console.log("video:", src);
+
+  modal.style.display = "flex";
+
+  modalVideo.src = src;
+  modalVideo.currentTime = 0;
+
+  modalVideo.muted = true;
+
+  modalVideo.play()
+    .then(()=>{
+      modalVideo.muted = false;
+    })
+    .catch(err=>{
+      console.log("Error:", err);
+    });
+}
+
+
+modal.addEventListener("click", ()=>{
+  modal.style.display = "none";
+  modalVideo.pause();
+  modalVideo.src = "";
+});
+
+
+document.getElementById("searchInput").addEventListener("input", e=>{
+  const value = e.target.value.toLowerCase();
+
+  if(!value){
+    renderClips(sortByDate([...clips]));
+    return;
+  }
+
+  const filtered = clips.filter(c=>{
+    return (
+      c.id.toLowerCase().includes(value) ||
+      c.player.toLowerCase().includes(value) ||
+      c.date.includes(value)
+    );
+  });
+
+  renderClips(sortByDate(filtered));
 });
